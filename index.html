@@ -55,15 +55,70 @@
     }
     init();
 
-    function previewImage(input) {
-      if (input.files && input.files[0]) {
+    // ==========================================
+    // ฟังก์ชันใหม่: ย่อขนาดรูปภาพก่อนส่ง
+    // ==========================================
+    function compressImage(file, maxWidth, maxHeight, quality) {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('preview').src = e.target.result;
+        reader.readAsDataURL(file);
+        reader.onload = event => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            // คำนวณสัดส่วนการย่อขนาด (ไม่ให้เกิน 800px)
+            if (width > height) {
+              if (width > maxWidth) {
+                height = Math.round(height * maxWidth / width);
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width = Math.round(width * maxHeight / height);
+                height = maxHeight;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // แปลงกลับเป็น Base64 แบบ JPEG และลด Quality ลง
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+        };
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    // ==========================================
+    // อัปเดตฟังก์ชัน previewImage เพื่อเรียกใช้การย่อรูป
+    // ==========================================
+    async function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const btnUpload = document.getElementById('btnUpload');
+        
+        // แจ้งเตือนลูกค้าว่ากำลังโหลดรูป
+        btnUpload.innerText = "กำลังย่อขนาดรูป...";
+        
+        try {
+          // ย่อรูปให้กว้าง/สูงไม่เกิน 800px และลดคุณภาพเหลือ 70%
+          base64Image = await compressImage(file, 800, 800, 0.7);
+          
+          // นำรูปที่ย่อแล้วมาแสดงตัวอย่าง
+          document.getElementById('preview').src = base64Image;
           document.getElementById('preview').classList.remove('hidden');
-          base64Image = e.target.result;
+          btnUpload.innerText = "เปลี่ยนรูปภาพ";
+        } catch (error) {
+          alert("เกิดข้อผิดพลาดในการโหลดรูป: " + error);
+          btnUpload.innerText = "เลือกรูปภาพ";
         }
-        reader.readAsDataURL(input.files[0]);
       }
     }
 
