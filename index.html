@@ -3,61 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>สั่งของร้านคุณลัดดา</title>
+  <title>ร้านพอใจขาย - เปิดจอง</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 font-sans">
-  <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-t-8 border-yellow-400">
-    <div class="p-6">
-      <h1 class="text-2xl font-black text-center text-slate-800 mb-2">🌽 ครัวคุณลัดดา</h1>
-      <p id="profileName" class="text-center text-slate-400 text-sm mb-6 font-medium">โหลดข้อมูลโปรไฟล์...</p>
+<body class="bg-orange-50 min-h-screen pb-32 font-sans">
+  
+  <div class="bg-white p-6 rounded-b-3xl shadow-sm text-center border-b-4 border-orange-400">
+    <h1 class="text-2xl font-black text-gray-800">🛒 ร้านพอใจขาย</h1>
+    <p class="text-orange-600 font-bold mt-1">เปิดรับออเดอร์พรุ่งนี้จ้า!</p>
+    <p id="profileName" class="text-sm text-gray-500 mt-2 bg-gray-100 inline-block px-3 py-1 rounded-full">👤 โหลดข้อมูล...</p>
+  </div>
+
+  <div id="productList" class="p-4 space-y-4 max-w-md mx-auto mt-2">
+    <p class="text-center text-gray-500 text-sm animate-pulse">กำลังโหลดเมนูวันนี้...</p>
+  </div>
+
+  <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-50">
+    <div class="max-w-md mx-auto">
       
-      <div class="space-y-5">
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">เมนูวันนี้:</label>
-          <select id="productSelect" class="w-full border-2 border-slate-100 p-3 rounded-xl mt-1 focus:border-yellow-400 outline-none appearance-none bg-white" onchange="updateTotal()">
-            <option value="" disabled selected>กำลังโหลดเมนู...</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">จำนวนที่ต้องการ:</label>
-          <input type="number" id="qty" value="1" min="1" class="w-full border-2 border-slate-100 p-3 rounded-xl mt-1 text-center text-xl font-bold" oninput="updateTotal()">
-        </div>
-
-        <div class="bg-yellow-50 p-5 rounded-2xl text-center">
-          <p class="text-slate-500 text-xs font-bold uppercase mb-1">ยอดรวมทั้งหมด</p>
-          <p class="text-4xl font-black text-yellow-600"><span id="totalDisplay">0</span> <span class="text-xl">฿</span></p>
-        </div>
-
-        <div class="border-2 border-dashed border-slate-200 p-5 rounded-2xl bg-slate-50 text-center">
-          <label class="cursor-pointer block">
-            <span class="text-slate-500 font-bold block mb-2 text-sm">📸 แนบสลิปโอนเงิน (ถ้ามี)</span>
-            <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="processImage(this)">
-            <div id="btnUpload" class="inline-block bg-white px-4 py-2 rounded-lg shadow-sm text-xs font-bold text-yellow-600 border border-yellow-100">เลือกรูปภาพ</div>
-          </label>
-          <img id="preview" class="hidden mt-4 rounded-xl max-h-48 mx-auto shadow-md border-4 border-white">
-        </div>
-
-        <button onclick="sendOrder()" id="btnSubmit" class="w-full bg-yellow-400 py-5 rounded-2xl font-black text-yellow-900 shadow-lg active:scale-95 transition-all text-lg uppercase tracking-wide">
-          ยืนยันการจอง / แจ้งโอน
-        </button>
+      <div class="mb-3">
+        <label class="cursor-pointer block border-2 border-dashed border-orange-200 rounded-xl p-2 text-center bg-orange-50 hover:bg-orange-100 transition">
+          <span id="uploadLabel" class="text-sm font-bold text-orange-600">📸 แนบสลิปโอนเงิน (ถ้ามี)</span>
+          <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="processImage(this)">
+        </label>
+        <img id="preview" class="hidden mt-2 rounded-lg max-h-24 mx-auto shadow-sm">
       </div>
+
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-gray-600 font-bold">ยอดรวม <span id="totalItems" class="text-orange-500">0</span> รายการ</span>
+        <span class="text-2xl font-black text-gray-800"><span id="totalPrice">0</span> ฿</span>
+      </div>
+      <button onclick="submitOrder()" id="btnSubmit" class="w-full bg-orange-500 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition disabled:opacity-50 disabled:active:scale-100">
+        ยืนยันการจอง 🚀
+      </button>
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // CONFIGURATION
-    // ==========================================
     const LIFF_ID = "2009833407-3mbGMf7p"; 
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzXgFrWaynovjrhBw5bJ1mhsL0J0Sr8fb25s5gJ_gO1-NvsN4zCZL4hYMmeDzpQ4gbedQ/exec"; // ถ้าเพิ่ง Deploy ใหม่ อย่าลืมเอาลิงก์ใหม่มาใส่นะครับ
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzXgFrWaynovjrhBw5bJ1mhsL0J0Sr8fb25s5gJ_gO1-NvsN4zCZL4hYMmeDzpQ4gbedQ/exec"; // อย่าลืมแก้เป็น URL ล่าสุดนะครับ
     
     let user = { id: "", name: "ลูกค้าทั่วไป" };
     let base64Image = "";
+    let menuData = [];
+    let cart = {}; // { "กระเพรา": { qty: 2, price: 70 } }
 
-    // 1. เริ่มต้น LIFF และโหลดเมนู
     async function init() {
       try {
         await liff.init({ liffId: LIFF_ID });
@@ -66,47 +57,101 @@
           user.id = profile.userId;
           user.name = profile.displayName;
         }
-        document.getElementById("profileName").innerText = "ผู้สั่ง: " + user.name;
-      } catch (err) {
-        document.getElementById("profileName").innerText = "ใช้งานผ่าน Web Browser";
-      }
-      loadProducts();
+        document.getElementById("profileName").innerText = "👤 ผู้สั่ง: " + user.name;
+      } catch (err) { console.log("LIFF Error, running in browser"); }
+      loadDashboard();
     }
     init();
 
-    // 2. โหลดรายการสินค้าจาก Sheet
-    async function loadProducts() {
+    async function loadDashboard() {
       try {
-        const response = await fetch(GAS_URL + "?action=getProducts");
+        const response = await fetch(GAS_URL + "?action=getDashboard");
         const result = await response.json();
-        const select = document.getElementById("productSelect");
-        select.innerHTML = "";
-        result.data.forEach(p => {
-          let opt = document.createElement("option");
-          opt.value = p.name;
-          opt.dataset.price = p.price;
-          opt.innerText = `${p.name} (${p.price}.-)`;
-          select.appendChild(opt);
-        });
-        updateTotal();
+        menuData = result.data;
+        renderProducts();
       } catch (e) {
-        alert("ไม่สามารถโหลดเมนูได้ กรุณารีเฟรชหน้าจอ");
+        document.getElementById("productList").innerHTML = "<p class='text-center text-red-500'>โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรช</p>";
       }
     }
 
-    function updateTotal() {
-      const select = document.getElementById("productSelect");
-      const price = select.options[select.selectedIndex]?.dataset.price || 0;
-      const qty = document.getElementById("qty").value;
-      document.getElementById("totalDisplay").innerText = price * qty;
+    function renderProducts() {
+      const container = document.getElementById("productList");
+      container.innerHTML = "";
+
+      menuData.forEach((item, index) => {
+        cart[item.name] = { qty: 0, price: item.price }; // ตั้งค่าเริ่มต้นตะกร้า
+        const isSoldOut = item.remaining <= 0;
+        
+        // จัดการรายชื่อคนจอง
+        let buyersHTML = "";
+        if (item.buyers.length > 0) {
+          const names = item.buyers.join(", ");
+          buyersHTML = `<p class="text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded-lg">📋 คนจอง: <span class="font-medium text-gray-700">${names}</span></p>`;
+        }
+
+        const card = `
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 ${isSoldOut ? 'opacity-70' : ''}">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-black text-gray-800 text-lg">${item.name}</h3>
+                <p class="text-orange-500 font-bold">${item.price} บาท</p>
+                <div class="mt-1 inline-block bg-${isSoldOut ? 'red' : 'green'}-100 text-${isSoldOut ? 'red' : 'green'}-700 text-xs px-2 py-1 rounded-md font-bold">
+                  ${isSoldOut ? 'หมดแล้ว ❌' : `ว่าง ${item.remaining} / ${item.quota}`}
+                </div>
+              </div>
+              
+              <div class="flex items-center space-x-3 bg-gray-50 rounded-xl p-1">
+                <button onclick="updateQty('${item.name}', -1, ${item.remaining})" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-gray-600 font-bold active:scale-90">-</button>
+                <span id="qty-${index}" class="font-black text-gray-800 w-4 text-center">0</span>
+                <button onclick="updateQty('${item.name}', 1, ${item.remaining})" class="w-8 h-8 flex items-center justify-center bg-orange-400 text-white rounded-lg shadow-sm font-bold active:scale-90" ${isSoldOut ? 'disabled' : ''}>+</button>
+              </div>
+            </div>
+            ${buyersHTML}
+          </div>
+        `;
+        container.innerHTML += card;
+      });
     }
 
-    // 3. ระบบบีบอัดรูปภาพ
+    function updateQty(itemName, change, maxRemaining) {
+      const currentQty = cart[itemName].qty;
+      let newQty = currentQty + change;
+      
+      if (newQty < 0) newQty = 0;
+      if (newQty > maxRemaining) {
+        alert("ขออภัยครับ สั่งเกินจำนวนโควต้าที่เหลืออยู่ 🙏");
+        newQty = maxRemaining;
+      }
+      
+      cart[itemName].qty = newQty;
+      
+      // Update UI number
+      const itemIndex = menuData.findIndex(p => p.name === itemName);
+      document.getElementById(`qty-${itemIndex}`).innerText = newQty;
+      
+      updateTotal();
+    }
+
+    function updateTotal() {
+      let sumPrice = 0;
+      let sumItems = 0;
+      for (const [name, data] of Object.entries(cart)) {
+        sumPrice += (data.qty * data.price);
+        sumItems += data.qty;
+      }
+      document.getElementById("totalPrice").innerText = sumPrice;
+      document.getElementById("totalItems").innerText = sumItems;
+      
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled = sumItems === 0; // ปิดปุ่มถ้ายังไม่เลือกของ
+    }
+
+    // ระบบย่อรูป
     function processImage(input) {
       if (!input.files || !input.files[0]) return;
       const file = input.files[0];
-      const btnUpload = document.getElementById('btnUpload');
-      btnUpload.innerText = "กำลังย่อขนาดรูป...";
+      const label = document.getElementById('uploadLabel');
+      label.innerText = "⏳ กำลังย่อรูป...";
       
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -116,49 +161,40 @@
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let width = img.width, height = img.height;
-          const maxSize = 800; // ไม่เกิน 800px
-
-          if (width > height && width > maxSize) {
-            height = Math.round(height * maxSize / width);
-            width = maxSize;
-          } else if (height > maxSize) {
-            width = Math.round(width * maxSize / height);
-            height = maxSize;
-          }
-
-          canvas.width = width; canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
+          if (width > height && width > 800) { height = Math.round(height * 800 / width); width = 800; } 
+          else if (height > 800) { width = Math.round(width * 800 / height); height = 800; }
           
-          base64Image = canvas.toDataURL('image/jpeg', 0.7); // ย่อเหลือ 70%
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          
+          base64Image = canvas.toDataURL('image/jpeg', 0.7);
           document.getElementById('preview').src = base64Image;
           document.getElementById('preview').classList.remove('hidden');
-          btnUpload.innerText = "เปลี่ยนรูปภาพ";
+          label.innerText = "✅ แนบรูปแล้ว (คลิกเพื่อเปลี่ยน)";
         };
       };
     }
 
-    // 4. ส่งข้อมูลไปที่ Google Sheets
-    async function sendOrder() {
+    async function submitOrder() {
       const btn = document.getElementById("btnSubmit");
-      const select = document.getElementById("productSelect");
       
-      if (!select.value) {
-        alert("กรุณารอโหลดเมนู หรือเลือกเมนูก่อนครับ");
-        return;
+      // รวบรวมเฉพาะของที่สั่ง
+      let orderedItems = [];
+      for (const [name, data] of Object.entries(cart)) {
+        if (data.qty > 0) orderedItems.push({ name: name, qty: data.qty, price: data.price });
       }
 
+      if (orderedItems.length === 0) return;
+
       btn.disabled = true;
-      btn.innerText = "กำลังประมวลผล...";
+      btn.innerText = "กำลังส่งออเดอร์... ⏳";
 
       const payload = {
         action: "createOrder",
         data: {
           customerName: user.name,
           lineId: user.id,
-          productName: select.value,
-          qty: document.getElementById("qty").value,
-          totalPrice: document.getElementById("totalDisplay").innerText,
+          cart: orderedItems,
           slipBase64: base64Image
         }
       };
@@ -166,22 +202,19 @@
       try {
         const response = await fetch(GAS_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" }, // เลี่ยงปัญหา CORS Block
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
-        
         const result = await response.json();
         
         if (result.status === "success") {
-          alert("บันทึกออเดอร์สำเร็จ! 🎉");
-          liff.closeWindow(); 
-        } else {
-          throw new Error(result.message);
-        }
+          alert("จองสำเร็จเรียบร้อย! ขอบคุณครับ 🎉");
+          liff.closeWindow();
+        } else { throw new Error(result.message); }
       } catch (err) {
         alert("เกิดข้อผิดพลาด: " + err.message);
         btn.disabled = false;
-        btn.innerText = "ลองใหม่อีกครั้ง";
+        btn.innerText = "ยืนยันการจอง 🚀";
       }
     }
   </script>
