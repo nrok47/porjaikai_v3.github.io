@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สั่งน้ำข้าวโพดคุณลัดดา</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body class="bg-yellow-50 min-h-screen flex items-center justify-center p-4 font-sans">
+  
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-8 border-yellow-400">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">🌽 ร้านคุณลัดดา</h1>
+      <p id="profileName" class="text-gray-500 mt-2 text-sm">กำลังโหลดโปรไฟล์...</p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนขวด (ขวดละ 35.-)</label>
+        <input type="number" id="qty" value="1" min="1" 
+               class="w-full border-2 border-yellow-100 rounded-lg p-3 focus:outline-none focus:border-yellow-400 text-xl text-center"
+               oninput="updateTotal()">
+      </div>
+
+      <div class="bg-yellow-100 p-4 rounded-lg text-center">
+        <span class="text-sm text-gray-600">ยอดชำระทั้งหมด</span>
+        <div class="text-4xl font-black text-yellow-700"><span id="total">35</span> ฿</div>
+      </div>
+
+      <button onclick="submitOrder()" id="btnSubmit"
+              class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-4 rounded-xl shadow-md transition-all active:scale-95 mt-4">
+        ยืนยันการสั่งซื้อ
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. ใส่ค่า Config ตรงนี้ให้ครบครับ
+    // ==========================================
+    const LIFF_ID = "ใส่_LIFF_ID_ของคุณตรงนี้"; 
+    const GAS_WEBAPP_URL = "ใส่_URL_จาก_GAS_Deployment_ตรงนี้"; // เช่น https://script.google.com/macros/s/.../exec
+    const PRICE_PER_BOTTLE = 35; 
+    
+    let user = { id: "", name: "" };
+
+    // ==========================================
+    // 2. เริ่มต้น LIFF และดึงชื่อลูกค้า
+    // ==========================================
+    async function initLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+        const profile = await liff.getProfile();
+        user.id = profile.userId;
+        user.name = profile.displayName;
+        document.getElementById("profileName").innerText = "สั่งโดยคุณ: " + user.name;
+      } catch (error) {
+        console.error("LIFF Init Error:", error);
+        document.getElementById("profileName").innerText = "เปิดใน LINE เพื่อสั่งซื้อแบบอัตโนมัติ";
+      }
+    }
+    
+    // เรียกใช้ตอนโหลดหน้าเว็บ
+    initLiff();
+
+    // ==========================================
+    // 3. คำนวณราคาแบบ Real-time
+    // ==========================================
+    function updateTotal() {
+      const q = document.getElementById("qty").value;
+      document.getElementById("total").innerText = q * PRICE_PER_BOTTLE;
+    }
+
+    // ==========================================
+    // 4. ส่งข้อมูลไปที่ Backend (API Code.gs)
+    // ==========================================
+    async function submitOrder() {
+      const qty = document.getElementById("qty").value;
+      const btn = document.getElementById("btnSubmit");
+      
+      if (qty < 1) {
+        alert("กรุณาระบุจำนวนอย่างน้อย 1 ขวดครับ");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "กำลังส่งออเดอร์...";
+
+      // สร้าง Payload ให้ตรงกับที่ API ฝั่ง GAS คาดหวัง
+      const payload = {
+        action: "createOrder",
+        data: {
+          customerName: user.name || "ลูกค้าทั่วไป",
+          productName: "น้ำข้าวโพด",
+          qty: parseInt(qty),
+          totalPrice: parseInt(qty) * PRICE_PER_BOTTLE
+        }
+      };
+
+      try {
+        const response = await fetch(GAS_WEBAPP_URL, {
+          method: "POST",
+          // ใช้ text/plain เลี่ยงปัญหา CORS Preflight ของ GAS
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          alert(`บันทึกออเดอร์สำเร็จ! 🎉\n(รหัสออเดอร์: ${result.data.orderId})\n\nกรุณาส่งสลิปโอนเงินต่อในกลุ่มได้เลยครับ`);
+          liff.closeWindow(); // ปิดหน้าต่างกลับไปที่แชท
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        alert("เกิดข้อผิดพลาด: " + error.message);
+        btn.disabled = false;
+        btn.innerText = "ลองใหม่อีกครั้ง";
+      }
+    }
+  </script>
+</body>
+</html>
