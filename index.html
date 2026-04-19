@@ -9,14 +9,20 @@
 </head>
 <body class="bg-slate-50 min-h-screen pb-40 font-sans">
   
-  <div class="bg-white p-6 rounded-b-3xl shadow-sm text-center border-b-4 border-orange-400">
+  <div class="bg-white p-6 rounded-b-3xl shadow-sm text-center border-b-4 border-orange-400 relative">
+    
+    <div class="absolute top-4 right-4 flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full shadow-sm">
+      <div id="statusDot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+      <span id="statusText" class="text-[10px] font-bold text-slate-500">กำลังเชื่อมต่อ...</span>
+    </div>
+
     <h1 class="text-2xl font-black text-slate-800 tracking-tight">🌽 ร้านพอใจขาย</h1>
     <p class="text-orange-600 font-bold text-sm mt-1">รับออเดอร์ล่วงหน้า ของอร่อยพร้อมเสิร์ฟจ้า</p>
     <p id="profileName" class="text-xs text-slate-400 mt-3 bg-slate-100 inline-block px-3 py-1 rounded-full">👤 กำลังโหลดข้อมูลผู้สั่ง...</p>
   </div>
 
   <div id="productList" class="p-4 space-y-4 max-w-md mx-auto">
-    <p class="text-center text-slate-400 text-sm animate-pulse mt-10">กำลังจัดเตรียมเมนูวันนี้...</p>
+    <p id="loadingText" class="text-center text-slate-400 text-sm animate-pulse mt-10">กำลังจัดเตรียมเมนูวันนี้...</p>
   </div>
 
   <div class="max-w-md mx-auto px-4 space-y-4 mb-10">
@@ -88,6 +94,21 @@
     let menuData = [];
     let cart = {};
 
+    // ฟังก์ชันจัดการไฟสถานะ
+    function setApiStatus(isOnline) {
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      if (isOnline) {
+        dot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]";
+        text.innerText = "เชื่อมต่อแล้ว";
+        text.className = "text-[10px] font-bold text-green-600";
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]";
+        text.innerText = "ระบบขัดข้อง";
+        text.className = "text-[10px] font-bold text-red-600";
+      }
+    }
+
     async function init() {
       try {
         await liff.init({ liffId: LIFF_ID });
@@ -103,23 +124,37 @@
     init();
 
     async function loadMenu() {
-      const response = await fetch(GAS_URL + "?action=getDashboard");
-      const result = await response.json();
-      menuData = result.data;
-      renderMenu();
+      try {
+        const response = await fetch(GAS_URL + "?action=getDashboard");
+        if (!response.ok) throw new Error("Network Error");
+        const result = await response.json();
+        
+        menuData = result.data;
+        renderMenu();
+        setApiStatus(true); // 🟢 สำเร็จ เปลี่ยนเป็นสีเขียว
+      } catch (error) {
+        document.getElementById("loadingText").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล ❌";
+        document.getElementById("loadingText").className = "text-center text-red-500 text-sm font-bold mt-10";
+        setApiStatus(false); // 🔴 พัง เปลี่ยนเป็นสีแดง
+      }
     }
 
     function renderMenu() {
       const container = document.getElementById("productList");
       container.innerHTML = "";
+      
+      // ใช้ placehold.co ที่ปลอดภัยกว่า หรือถ้าไม่มีรูประบบก็จะแสดงกล่องสีเทาแทน
+      const fallbackImg = "https://placehold.co/150x150/ffedd5/f97316?text=Menu";
+
       menuData.forEach((item, index) => {
         cart[item.name] = { qty: 0, price: item.price };
         const isSoldOut = item.remaining <= 0;
+        const imgUrl = item.imageUrl || fallbackImg;
         
         container.innerHTML += `
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4 ${isSoldOut ? 'opacity-60' : ''}">
             <div class="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
-              <img src="${item.imageUrl || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover">
+              <img src="${imgUrl}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover">
             </div>
             <div class="flex-grow">
               <h3 class="font-black text-slate-800">${item.name}</h3>
@@ -199,8 +234,17 @@
       try {
         const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
         const result = await res.json();
-        if (result.status === "success") { alert("จองสำเร็จ! ขอบคุณมากค่ะ 🎉"); liff.closeWindow(); }
-      } catch (err) { alert("เกิดข้อผิดพลาด กรุณาลองใหม่"); btn.disabled = false; btn.innerText = "ยืนยันการสั่งซื้อ 🚀"; }
+        if (result.status === "success") { 
+          alert("จองสำเร็จ! ขอบคุณมากค่ะ 🎉"); 
+          liff.closeWindow(); 
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (err) { 
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล 🔴"); 
+        btn.disabled = false; 
+        btn.innerText = "ยืนยันการสั่งซื้อ 🚀"; 
+      }
     }
   </script>
 </body>
