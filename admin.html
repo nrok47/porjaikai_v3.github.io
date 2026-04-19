@@ -11,7 +11,28 @@
   <div class="max-w-md mx-auto p-4 space-y-4">
     <div class="flex justify-between items-center mb-2">
       <h1 class="text-2xl font-black text-slate-800">📊 จัดการร้าน</h1>
-      <button onclick="loadAdminData()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold active:scale-95">🔄 อัปเดต</button>
+      <button onclick="loadAdminData()" id="btnRefresh" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold active:scale-95 transition">🔄 อัปเดต</button>
+    </div>
+
+    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-indigo-500">
+      <h2 class="font-bold text-slate-500 text-sm mb-3">🛠️ จัดการเมนู (เพิ่ม/ลบ/แก้ไข)</h2>
+      
+      <div class="bg-indigo-50 p-4 rounded-2xl mb-4 shadow-inner">
+        <input type="hidden" id="prodId">
+        <input type="hidden" id="prodOldName">
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <input type="text" id="prodName" placeholder="ชื่อเมนู" class="col-span-2 p-2 rounded-lg border outline-none text-sm font-bold text-slate-700">
+          <input type="number" id="prodPrice" placeholder="ราคา (฿)" class="p-2 rounded-lg border outline-none text-sm text-center">
+          <input type="number" id="prodStock" placeholder="โควต้า/สต็อก" class="p-2 rounded-lg border outline-none text-sm text-center">
+          <input type="text" id="prodImg" placeholder="URL รูปภาพ (ถ้ามี)" class="col-span-2 p-2 rounded-lg border outline-none text-sm text-slate-500">
+        </div>
+        <div class="flex space-x-2">
+          <button onclick="saveProduct()" id="btnSaveProd" class="flex-1 bg-indigo-500 text-white py-2 rounded-xl font-bold shadow-md active:scale-95 transition">💾 บันทึก</button>
+          <button onclick="clearProductForm()" class="bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold active:scale-95 transition">ล้าง</button>
+        </div>
+      </div>
+
+      <div id="productCrudList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
     </div>
 
     <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-green-500">
@@ -29,11 +50,9 @@
 
     <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-blue-500">
       <h2 class="font-bold text-slate-500 text-sm mb-3">📦 ยอดผลิตรวม</h2>
-      <div id="productionSummary" class="space-y-2"></div>
-    </div>
-
-    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-orange-400">
-      <h2 class="font-bold text-slate-500 text-sm mb-3">+ กดขายหน้าร้าน (เงินสด)</h2>
+      <div id="productionSummary" class="space-y-2 mb-4"></div>
+      
+      <h2 class="font-bold text-slate-500 text-sm mb-2 border-t pt-4">+ กดขายหน้าร้าน (เงินสด)</h2>
       <div class="grid grid-cols-2 gap-2" id="walkInButtons"></div>
     </div>
 
@@ -44,14 +63,22 @@
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzXgFrWaynovjrhBw5bJ1mhsL0J0Sr8fb25s5gJ_gO1-NvsN4zCZL4hYMmeDzpQ4gbedQ/exec"; // ใช้ URL ล่าสุด
+    // ⚠️ อย่าลืมใส่ URL ล่าสุดของคุณชยกรที่นี่ครับ
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzXgFrWaynovjrhBw5bJ1mhsL0J0Sr8fb25s5gJ_gO1-NvsN4zCZL4hYMmeDzpQ4gbedQ/exec"; 
+
+    let allProducts = [];
 
     async function loadAdminData() {
-      document.getElementById("finTotal").innerText = "...";
+      const btn = document.getElementById("btnRefresh");
+      btn.innerText = "⏳ กำลังโหลด...";
       try {
         const response = await fetch(GAS_URL + "?action=getAdminData");
         const result = await response.json();
         
+        // Render Products (CRUD)
+        allProducts = result.data.products;
+        renderProductCrud();
+
         // Render Finance
         document.getElementById("finTotal").innerText = result.data.finance.total;
         document.getElementById("finTransfer").innerText = result.data.finance.transfer;
@@ -62,8 +89,78 @@
         renderWalkInButtons(result.data.summary);
         renderDelivery(result.data.orders);
       } catch(e) { alert("ดึงข้อมูลไม่สำเร็จ"); }
+      btn.innerText = "🔄 อัปเดต";
     }
 
+    // --- CRUD FUNCTIONS ---
+    function renderProductCrud() {
+      document.getElementById("productCrudList").innerHTML = allProducts.map(p => `
+        <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-sm">
+          <div>
+            <p class="font-black text-slate-700">${p.name}</p>
+            <p class="text-xs text-slate-500">${p.price}฿ | โควต้า: <span class="${p.stock > 0 ? 'text-green-600' : 'text-red-500'} font-bold">${p.stock}</span></p>
+          </div>
+          <div class="space-x-1 flex">
+            <button onclick='editProduct(${JSON.stringify(p)})' class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-lg transition">✏️</button>
+            <button onclick="deleteProduct('${p.id}', '${p.name}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg transition">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function editProduct(p) {
+      document.getElementById("prodId").value = p.id;
+      document.getElementById("prodOldName").value = p.name;
+      document.getElementById("prodName").value = p.name;
+      document.getElementById("prodPrice").value = p.price;
+      document.getElementById("prodStock").value = p.stock;
+      document.getElementById("prodImg").value = p.imageUrl;
+      document.getElementById("btnSaveProd").innerText = "🔄 อัปเดตเมนู";
+      document.getElementById("prodName").focus();
+    }
+
+    function clearProductForm() {
+      document.getElementById("prodId").value = "";
+      document.getElementById("prodOldName").value = "";
+      document.getElementById("prodName").value = "";
+      document.getElementById("prodPrice").value = "";
+      document.getElementById("prodStock").value = "";
+      document.getElementById("prodImg").value = "";
+      document.getElementById("btnSaveProd").innerText = "💾 เพิ่มเมนูใหม่";
+    }
+
+    async function saveProduct() {
+      const id = document.getElementById("prodId").value;
+      const oldName = document.getElementById("prodOldName").value;
+      const name = document.getElementById("prodName").value;
+      const price = document.getElementById("prodPrice").value;
+      const stock = document.getElementById("prodStock").value;
+      const img = document.getElementById("prodImg").value;
+
+      if(!name || !price || !stock) { alert("กรุณาใส่ชื่อ ราคา และโควต้าให้ครบครับ"); return; }
+      
+      const btn = document.getElementById("btnSaveProd");
+      btn.innerText = "⏳ กำลังบันทึก...";
+      btn.disabled = true;
+
+      const payload = {
+        action: 'manageProduct',
+        data: { mode: id || oldName ? 'update' : 'create', id, oldName, name, price, stock, imageUrl: img }
+      };
+
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      clearProductForm();
+      loadAdminData(); // โหลดข้อมูลใหม่
+      btn.disabled = false;
+    }
+
+    async function deleteProduct(id, name) {
+      if(!confirm(`⚠️ ยืนยันการลบเมนู "${name}" ใช่หรือไม่?`)) return;
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', data: { mode: 'delete', id, oldName: name } }) });
+      loadAdminData();
+    }
+
+    // --- OTHER FUNCTIONS ---
     function renderProduction(summary) {
       document.getElementById("productionSummary").innerHTML = summary.map(item => `
         <div class="flex justify-between items-center border-b border-slate-50 pb-2">
@@ -95,7 +192,6 @@
       document.getElementById("deliveryList").innerHTML = orders.map(order => {
         const isDelivered = order.deliveryStatus === 'ส่งแล้ว';
         const isPaid = order.payMethod === 'โอนเงิน' || order.payMethod === 'เงินสด';
-        
         return `
         <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-sm">
           <div class="flex justify-between mb-1">
@@ -103,13 +199,11 @@
             <span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 rounded">${order.deliveryMethod}</span>
           </div>
           <div class="text-slate-500 mb-3">${order.items.join(', ')}</div>
-          
           <div class="flex space-x-2">
             <button onclick="updateStatus('${order.orderId}', 'delivery', '${isDelivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" 
               class="flex-1 py-2 rounded-lg font-bold text-xs transition ${isDelivered ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600'}">
               ${isDelivered ? '✅ ส่งแล้ว' : '📦 กดเมื่อส่งของ'}
             </button>
-            
             <select onchange="updateStatus('${order.orderId}', 'payment', this.value)" 
               class="flex-1 border-none rounded-lg font-bold text-xs text-center outline-none ${isPaid ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-600'}">
               <option value="ค้างจ่าย" ${order.payMethod==='ค้างจ่าย'?'selected':''}>❌ ค้างจ่าย</option>
@@ -123,7 +217,7 @@
 
     async function updateStatus(orderId, type, value) {
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', data: { orderId, type, value }}) });
-      loadAdminData(); // รีเฟรชหน้าจอ
+      loadAdminData(); 
     }
 
     loadAdminData();
