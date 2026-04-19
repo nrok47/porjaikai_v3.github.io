@@ -2,43 +2,45 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สั่งของร้านคุณลัดดา</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
-<body class="bg-gray-100 p-4 font-sans">
-  <div class="bg-white max-w-md mx-auto rounded-3xl shadow-lg overflow-hidden border-t-8 border-yellow-400">
+<body class="bg-slate-50 min-h-screen p-4 font-sans">
+  <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-t-8 border-yellow-400">
     <div class="p-6">
-      <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">🌽 ครัวคุณลัดดา</h1>
+      <h1 class="text-2xl font-black text-center text-slate-800 mb-2">🌽 ครัวคุณลัดดา</h1>
+      <p id="profileName" class="text-center text-slate-400 text-sm mb-6 font-medium">โหลดข้อมูลโปรไฟล์...</p>
       
-      <div class="space-y-4">
+      <div class="space-y-5">
         <div>
-          <label class="text-sm font-semibold text-gray-600">วันนี้คุณลัดดาขายอะไร:</label>
-          <select id="productSelect" class="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 focus:border-yellow-400 outline-none" onchange="updateTotal()">
-            <option value="น้ำข้าวโพด" data-price="35">น้ำข้าวโพด (35.-)</option>
-            <option value="น้ำฟักทอง" data-price="40">น้ำฟักทอง (40.-)</option>
-            <option value="ข้าวกล่อง" data-price="55">ข้าวกล่อง (55.-)</option>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">เมนูวันนี้:</label>
+          <select id="productSelect" class="w-full border-2 border-slate-100 p-3 rounded-xl mt-1 focus:border-yellow-400 outline-none appearance-none bg-white" onchange="updateTotal()">
+            <option value="" disabled selected>กำลังโหลดเมนู...</option>
           </select>
         </div>
 
         <div>
-          <label class="text-sm font-semibold text-gray-600">ระบุจำนวน:</label>
-          <input type="number" id="qty" value="1" min="1" class="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 text-center text-xl" oninput="updateTotal()">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">จำนวนที่ต้องการ:</label>
+          <input type="number" id="qty" value="1" min="1" class="w-full border-2 border-slate-100 p-3 rounded-xl mt-1 text-center text-xl font-bold" oninput="updateTotal()">
         </div>
 
-        <div class="bg-yellow-50 p-4 rounded-2xl text-center">
-          <p class="text-gray-600 text-sm">ยอดรวมที่ต้องชำระ</p>
-          <p class="text-3xl font-black text-yellow-600"><span id="totalDisplay">35</span> ฿</p>
+        <div class="bg-yellow-50 p-5 rounded-2xl text-center">
+          <p class="text-slate-500 text-xs font-bold uppercase mb-1">ยอดรวมทั้งหมด</p>
+          <p class="text-4xl font-black text-yellow-600"><span id="totalDisplay">0</span> <span class="text-xl">฿</span></p>
         </div>
 
-        <div class="border-2 border-dashed border-gray-200 p-4 rounded-2xl">
-          <label class="block text-sm font-semibold text-gray-600 text-center cursor-pointer">
-            <span>📸 แนบสลิปโอนเงิน (ถ้ามี)</span>
-            <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="previewImage(this)">
+        <div class="border-2 border-dashed border-slate-200 p-5 rounded-2xl bg-slate-50 text-center">
+          <label class="cursor-pointer block">
+            <span class="text-slate-500 font-bold block mb-2 text-sm">📸 แนบสลิปโอนเงิน (ถ้ามี)</span>
+            <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="processImage(this)">
+            <div id="btnUpload" class="inline-block bg-white px-4 py-2 rounded-lg shadow-sm text-xs font-bold text-yellow-600 border border-yellow-100">เลือกรูปภาพ</div>
           </label>
-          <img id="preview" class="hidden mt-2 rounded-lg max-h-40 mx-auto">
+          <img id="preview" class="hidden mt-4 rounded-xl max-h-48 mx-auto shadow-md border-4 border-white">
         </div>
 
-        <button onclick="sendOrder()" id="btnSubmit" class="w-full bg-yellow-400 py-4 rounded-2xl font-bold text-yellow-900 shadow-md active:scale-95 transition-all">
+        <button onclick="sendOrder()" id="btnSubmit" class="w-full bg-yellow-400 py-5 rounded-2xl font-black text-yellow-900 shadow-lg active:scale-95 transition-all text-lg uppercase tracking-wide">
           ยืนยันการจอง / แจ้งโอน
         </button>
       </div>
@@ -46,110 +48,114 @@
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzXgFrWaynovjrhBw5bJ1mhsL0J0Sr8fb25s5gJ_gO1-NvsN4zCZL4hYMmeDzpQ4gbedQ/exec";
+    // ==========================================
+    // CONFIGURATION
+    // ==========================================
+    const LIFF_ID = "2009833407-3mbGMf7p"; 
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzXgFrWaynovjrhBw5bJ1mhsL0J0Sr8fb25s5gJ_gO1-NvsN4zCZL4hYMmeDzpQ4gbedQ/exec"; // ถ้าเพิ่ง Deploy ใหม่ อย่าลืมเอาลิงก์ใหม่มาใส่นะครับ
+    
+    let user = { id: "", name: "ลูกค้าทั่วไป" };
     let base64Image = "";
 
+    // 1. เริ่มต้น LIFF และโหลดเมนู
     async function init() {
-      await liff.init({ liffId: "2009833407-3mbGMf7p" });
-      if (!liff.isLoggedIn()) liff.login();
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          user.id = profile.userId;
+          user.name = profile.displayName;
+        }
+        document.getElementById("profileName").innerText = "ผู้สั่ง: " + user.name;
+      } catch (err) {
+        document.getElementById("profileName").innerText = "ใช้งานผ่าน Web Browser";
+      }
+      loadProducts();
     }
     init();
 
-    // ==========================================
-    // ฟังก์ชันใหม่: ย่อขนาดรูปภาพก่อนส่ง
-    // ==========================================
-    function compressImage(file, maxWidth, maxHeight, quality) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = event => {
-          const img = new Image();
-          img.src = event.target.result;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-
-            // คำนวณสัดส่วนการย่อขนาด (ไม่ให้เกิน 800px)
-            if (width > height) {
-              if (width > maxWidth) {
-                height = Math.round(height * maxWidth / width);
-                width = maxWidth;
-              }
-            } else {
-              if (height > maxHeight) {
-                width = Math.round(width * maxHeight / height);
-                height = maxHeight;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            // แปลงกลับเป็น Base64 แบบ JPEG และลด Quality ลง
-            resolve(canvas.toDataURL('image/jpeg', quality));
-          };
-        };
-        reader.onerror = error => reject(error);
-      });
-    }
-
-    // ==========================================
-    // อัปเดตฟังก์ชัน previewImage เพื่อเรียกใช้การย่อรูป
-    // ==========================================
-    async function previewImage(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const btnUpload = document.getElementById('btnUpload'); // พยายามหาปุ่ม
-        
-        // เช็กก่อนว่าหาปุ่มเจอไหม ถ้าเจอก็เปลี่ยนข้อความ
-        if (btnUpload) {
-          btnUpload.innerText = "กำลังย่อขนาดรูป...";
-        }
-        
-        try {
-          // ย่อรูปให้กว้าง/สูงไม่เกิน 800px และลดคุณภาพเหลือ 70%
-          base64Image = await compressImage(file, 800, 800, 0.7);
-          
-          // นำรูปที่ย่อแล้วมาแสดงตัวอย่าง
-          document.getElementById('preview').src = base64Image;
-          document.getElementById('preview').classList.remove('hidden');
-          
-          // คืนค่าปุ่มกลับมา
-          if (btnUpload) {
-            btnUpload.innerText = "เปลี่ยนรูปภาพ";
-          }
-        } catch (error) {
-          console.error(error);
-          alert("เกิดข้อผิดพลาดในการโหลดรูป: " + error);
-          if (btnUpload) {
-            btnUpload.innerText = "เลือกรูปภาพ";
-          }
-        }
+    // 2. โหลดรายการสินค้าจาก Sheet
+    async function loadProducts() {
+      try {
+        const response = await fetch(GAS_URL + "?action=getProducts");
+        const result = await response.json();
+        const select = document.getElementById("productSelect");
+        select.innerHTML = "";
+        result.data.forEach(p => {
+          let opt = document.createElement("option");
+          opt.value = p.name;
+          opt.dataset.price = p.price;
+          opt.innerText = `${p.name} (${p.price}.-)`;
+          select.appendChild(opt);
+        });
+        updateTotal();
+      } catch (e) {
+        alert("ไม่สามารถโหลดเมนูได้ กรุณารีเฟรชหน้าจอ");
       }
     }
 
     function updateTotal() {
       const select = document.getElementById("productSelect");
-      const price = select.options[select.selectedIndex].getAttribute("data-price");
+      const price = select.options[select.selectedIndex]?.dataset.price || 0;
       const qty = document.getElementById("qty").value;
       document.getElementById("totalDisplay").innerText = price * qty;
     }
 
+    // 3. ระบบบีบอัดรูปภาพ
+    function processImage(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const btnUpload = document.getElementById('btnUpload');
+      btnUpload.innerText = "กำลังย่อขนาดรูป...";
+      
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = event => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width, height = img.height;
+          const maxSize = 800; // ไม่เกิน 800px
+
+          if (width > height && width > maxSize) {
+            height = Math.round(height * maxSize / width);
+            width = maxSize;
+          } else if (height > maxSize) {
+            width = Math.round(width * maxSize / height);
+            height = maxSize;
+          }
+
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          base64Image = canvas.toDataURL('image/jpeg', 0.7); // ย่อเหลือ 70%
+          document.getElementById('preview').src = base64Image;
+          document.getElementById('preview').classList.remove('hidden');
+          btnUpload.innerText = "เปลี่ยนรูปภาพ";
+        };
+      };
+    }
+
+    // 4. ส่งข้อมูลไปที่ Google Sheets
     async function sendOrder() {
       const btn = document.getElementById("btnSubmit");
+      const select = document.getElementById("productSelect");
+      
+      if (!select.value) {
+        alert("กรุณารอโหลดเมนู หรือเลือกเมนูก่อนครับ");
+        return;
+      }
+
       btn.disabled = true;
       btn.innerText = "กำลังประมวลผล...";
 
-      const profile = await liff.getProfile();
-      const select = document.getElementById("productSelect");
-      
       const payload = {
         action: "createOrder",
         data: {
-          customerName: profile.displayName,
+          customerName: user.name,
+          lineId: user.id,
           productName: select.value,
           qty: document.getElementById("qty").value,
           totalPrice: document.getElementById("totalDisplay").innerText,
@@ -157,15 +163,25 @@
         }
       };
 
-      const response = await fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-      const result = await response.json();
-
-      if (result.status === "success") {
-        alert("บันทึกข้อมูลเรียบร้อยแล้วค่ะ!");
-        liff.closeWindow();
+      try {
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" }, // เลี่ยงปัญหา CORS Block
+          body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          alert("บันทึกออเดอร์สำเร็จ! 🎉");
+          liff.closeWindow(); 
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (err) {
+        alert("เกิดข้อผิดพลาด: " + err.message);
+        btn.disabled = false;
+        btn.innerText = "ลองใหม่อีกครั้ง";
       }
     }
   </script>
