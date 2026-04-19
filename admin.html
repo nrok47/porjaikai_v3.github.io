@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>หลังบ้าน - ร้านพอใจขาย</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen pb-10 font-sans">
+  
+  <div class="max-w-md mx-auto p-4 space-y-4">
+    <div class="flex justify-between items-center mb-2">
+      <h1 class="text-2xl font-black text-slate-800">📊 จัดการร้าน</h1>
+      <button onclick="loadAdminData()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold active:scale-95">🔄 อัปเดต</button>
+    </div>
+
+    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-green-500">
+      <h2 class="font-bold text-slate-500 text-sm mb-3">💰 สรุปการเงินวันนี้</h2>
+      <div class="text-center mb-4">
+        <p class="text-xs text-slate-400">ยอดขายรวม</p>
+        <p class="text-4xl font-black text-green-600"><span id="finTotal">0</span> ฿</p>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold border-t pt-3">
+        <div><p class="text-slate-400">โอนแล้ว</p><p id="finTransfer" class="text-blue-500 text-lg">0</p></div>
+        <div><p class="text-slate-400">เงินสด</p><p id="finCash" class="text-emerald-500 text-lg">0</p></div>
+        <div><p class="text-slate-400">ค้างจ่าย</p><p id="finUnpaid" class="text-red-500 text-lg">0</p></div>
+      </div>
+    </div>
+
+    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-blue-500">
+      <h2 class="font-bold text-slate-500 text-sm mb-3">📦 ยอดผลิตรวม</h2>
+      <div id="productionSummary" class="space-y-2"></div>
+    </div>
+
+    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-orange-400">
+      <h2 class="font-bold text-slate-500 text-sm mb-3">+ กดขายหน้าร้าน (เงินสด)</h2>
+      <div class="grid grid-cols-2 gap-2" id="walkInButtons"></div>
+    </div>
+
+    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-purple-500">
+      <h2 class="font-bold text-slate-500 text-sm mb-3">🚚 รายการส่งของวันนี้</h2>
+      <div id="deliveryList" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzXgFrWaynovjrhBw5bJ1mhsL0J0Sr8fb25s5gJ_gO1-NvsN4zCZL4hYMmeDzpQ4gbedQ/exec"; // ใช้ URL ล่าสุด
+
+    async function loadAdminData() {
+      document.getElementById("finTotal").innerText = "...";
+      try {
+        const response = await fetch(GAS_URL + "?action=getAdminData");
+        const result = await response.json();
+        
+        // Render Finance
+        document.getElementById("finTotal").innerText = result.data.finance.total;
+        document.getElementById("finTransfer").innerText = result.data.finance.transfer;
+        document.getElementById("finCash").innerText = result.data.finance.cash;
+        document.getElementById("finUnpaid").innerText = result.data.finance.unpaid;
+
+        renderProduction(result.data.summary);
+        renderWalkInButtons(result.data.summary);
+        renderDelivery(result.data.orders);
+      } catch(e) { alert("ดึงข้อมูลไม่สำเร็จ"); }
+    }
+
+    function renderProduction(summary) {
+      document.getElementById("productionSummary").innerHTML = summary.map(item => `
+        <div class="flex justify-between items-center border-b border-slate-50 pb-2">
+          <span class="font-bold text-slate-700">${item.name}</span>
+          <span class="text-lg font-black text-blue-600 bg-blue-50 px-3 rounded-lg">${item.total}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderWalkInButtons(summary) {
+      document.getElementById("walkInButtons").innerHTML = summary.map(item => `
+        <button onclick="quickSale('${item.name}', ${item.price})" class="bg-orange-50 hover:bg-orange-100 text-orange-700 py-2 rounded-xl text-xs font-bold border border-orange-200 transition active:scale-95">
+          ${item.name}
+        </button>
+      `).join('');
+    }
+
+    async function quickSale(name, price) {
+      if(!confirm(`บันทึกขายหน้าร้าน: ${name}?`)) return;
+      const payload = { action: 'createOrder', data: {
+        customerName: "ขายหน้างาน (Walk-in)", cart: [{name: name, qty: 1, price: price}],
+        paymentMethod: "เงินสด", deliveryMethod: "รับเองหน้างาน"
+      }};
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      loadAdminData();
+    }
+
+    function renderDelivery(orders) {
+      document.getElementById("deliveryList").innerHTML = orders.map(order => {
+        const isDelivered = order.deliveryStatus === 'ส่งแล้ว';
+        const isPaid = order.payMethod === 'โอนเงิน' || order.payMethod === 'เงินสด';
+        
+        return `
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-sm">
+          <div class="flex justify-between mb-1">
+            <span class="font-black text-slate-800">${order.customer}</span>
+            <span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 rounded">${order.deliveryMethod}</span>
+          </div>
+          <div class="text-slate-500 mb-3">${order.items.join(', ')}</div>
+          
+          <div class="flex space-x-2">
+            <button onclick="updateStatus('${order.orderId}', 'delivery', '${isDelivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" 
+              class="flex-1 py-2 rounded-lg font-bold text-xs transition ${isDelivered ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600'}">
+              ${isDelivered ? '✅ ส่งแล้ว' : '📦 กดเมื่อส่งของ'}
+            </button>
+            
+            <select onchange="updateStatus('${order.orderId}', 'payment', this.value)" 
+              class="flex-1 border-none rounded-lg font-bold text-xs text-center outline-none ${isPaid ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-600'}">
+              <option value="ค้างจ่าย" ${order.payMethod==='ค้างจ่าย'?'selected':''}>❌ ค้างจ่าย</option>
+              <option value="โอนเงิน" ${order.payMethod==='โอนเงิน'?'selected':''}>📱 โอนเงิน</option>
+              <option value="เงินสด" ${order.payMethod==='เงินสด'?'selected':''}>💵 เงินสด</option>
+            </select>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    async function updateStatus(orderId, type, value) {
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', data: { orderId, type, value }}) });
+      loadAdminData(); // รีเฟรชหน้าจอ
+    }
+
+    loadAdminData();
+  </script>
+</body>
+</html>
