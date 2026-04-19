@@ -102,10 +102,12 @@
     async function previewImage(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
-        const btnUpload = document.getElementById('btnUpload');
+        const btnUpload = document.getElementById('btnUpload'); // พยายามหาปุ่ม
         
-        // แจ้งเตือนลูกค้าว่ากำลังโหลดรูป
-        btnUpload.innerText = "กำลังย่อขนาดรูป...";
+        // เช็กก่อนว่าหาปุ่มเจอไหม ถ้าเจอก็เปลี่ยนข้อความ
+        if (btnUpload) {
+          btnUpload.innerText = "กำลังย่อขนาดรูป...";
+        }
         
         try {
           // ย่อรูปให้กว้าง/สูงไม่เกิน 800px และลดคุณภาพเหลือ 70%
@@ -114,10 +116,17 @@
           // นำรูปที่ย่อแล้วมาแสดงตัวอย่าง
           document.getElementById('preview').src = base64Image;
           document.getElementById('preview').classList.remove('hidden');
-          btnUpload.innerText = "เปลี่ยนรูปภาพ";
+          
+          // คืนค่าปุ่มกลับมา
+          if (btnUpload) {
+            btnUpload.innerText = "เปลี่ยนรูปภาพ";
+          }
         } catch (error) {
+          console.error(error);
           alert("เกิดข้อผิดพลาดในการโหลดรูป: " + error);
-          btnUpload.innerText = "เลือกรูปภาพ";
+          if (btnUpload) {
+            btnUpload.innerText = "เลือกรูปภาพ";
+          }
         }
       }
     }
