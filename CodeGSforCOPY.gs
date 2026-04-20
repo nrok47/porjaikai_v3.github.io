@@ -1,14 +1,12 @@
 // ==========================================
-// CONFIGURATION v7 (All-in-One System)
+// CONFIGURATION v7 (All-in-One System) - STITCH DESIGN
 // ==========================================
 const SPREADSHEET_ID = '1KLJMaZ3eLrgijBcPzDxNOsjvJBcvke1v8Fk-KvM8Yaw'; 
 const SLIP_FOLDER_ID = '1iZN5-ILCCqRUltRpGzvWwXYqo6dqocEL'; 
-
-// Admin password check
 const ADMIN_PASSWORD = '12399';
 
 function checkAdminAuth(params) {
-  return params.password === ADMIN_PASSWORD;
+  return params && params.password === ADMIN_PASSWORD;
 }
 
 function doGet(e) {
@@ -20,14 +18,16 @@ function doGet(e) {
     if (!checkAdminAuth(e.parameter)) return responseJSON({ status: 'error', message: 'Unauthorized' });
     return responseJSON({ status: 'success', data: getAdminData() });
   }
-  return ContentService.createTextOutput("API v7 Online");
+  return ContentService.createTextOutput("🔐 API v7 STITCH Online");
 }
 
 function doPost(e) {
-  const headers = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST", "Access-Control-Allow-Headers": "Content-Type" };
+  const headers = { "Access-Control-Allow-Origin": "*" };
   try {
     const payload = JSON.parse(e.postData.contents);
-    if (!checkAdminAuth(payload)) return responseJSON({ status: 'error', message: 'Unauthorized' }, headers);
+    if (payload.action !== 'createOrder' && !checkAdminAuth(payload)) {
+      return responseJSON({ status: 'error', message: 'Unauthorized' }, headers);
+    }
     
     if (payload.action === 'createOrder') return responseJSON({ status: 'success', data: createOrder(payload.data) }, headers);
     if (payload.action === 'updateStatus') return responseJSON({ status: 'success', data: updateStatus(payload.data) }, headers);
@@ -62,7 +62,7 @@ function getDashboardData(lineId) {
       bookings[prodName].totalQty += qty;
       bookings[prodName].buyers.push(customer);
       
-      // ดักจับออเดอร์ของตัวเอง (ถ้า LineId ตรงกัน)
+      // ดักจับออเดอร์ของตัวเอง
       if (lineId && currentLineId === lineId) {
         myOrders.push({
           id: orderData[i][0],
@@ -92,31 +92,52 @@ function getDashboardData(lineId) {
   return { products, myOrders };
 }
 
-// --- สรุปข้อมูลหลังบ้าน (Admin & Monthly Stats) ---
+// --- สรุปข้อมูลหลังบ้าน (Admin Dashboard) ---
 function getAdminData() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const pmSheet = ss.getSheetByName('seller (1)') || ss.getSheets()[0];
   const orderSheet = ss.getSheetByName('orderz') || ss.getSheets()[1];
-  const data = orderSheet.getDataRange().getValues();
+  
+  const pmData = pmSheet.getDataRange().getValues();
+  const orderData = orderSheet.getDataRange().getValues();
   
   const today = new Date(); today.setHours(0,0,0,0);
   let summary = {}; let ordersMap = {}; 
-  let finance = { total: 0, transfer: 0, cash: 0 };
-  let monthlyStats = {}; // เก็บยอดขายรายเดือน { "2024-04": 5000 }
+  let finance = { total: 0, transfer: 0, cash: 0, unpaid: 0 };
+  let monthlyStats = {};
+  let products = [];
 
-  for (let i = 1; i < data.length; i++) {
-    const rowDate = new Date(data[i][1]);
+  // Build products list with IDs
+  for (let i = 1; i < pmData.length; i++) {
+    const quota = parseInt(pmData[i][3]) || 0;
+    if (quota > 0) {
+      products.push({
+        id: pmData[i][0] || ('product_' + i),
+        name: pmData[i][1],
+        price: pmData[i][2],
+        stock: quota,
+        imageUrl: pmData[i][6] || ""
+      });
+    }
+  }
+
+  // Process orders
+  for (let i = 1; i < orderData.length; i++) {
+    const rowDate = new Date(orderData[i][1]);
     const monthKey = Utilities.formatDate(rowDate, "GMT+7", "yyyy-MM");
-    const rowPrice = parseInt(data[i][5]) || 0;
+    const rowPrice = parseInt(orderData[i][5]) || 0;
 
-    // สถิติรายเดือน (Overall)
+    // Monthly stats
     monthlyStats[monthKey] = (monthlyStats[monthKey] || 0) + rowPrice;
 
     if (rowDate >= today) {
-      const orderId = data[i][0];
-      const product = data[i][3];
-      const qty = parseInt(data[i][4]) || 0;
-      const payStatus = data[i][6];
-      const payMethod = data[i][11];
+      const orderId = orderData[i][0];
+      const product = orderData[i][3];
+      const qty = parseInt(orderData[i][4]) || 0;
+      const payStatus = orderData[i][6];
+      const payMethod = orderData[i][11];
+      const deliveryStatus = orderData[i][10];
+      const deliveryMethod = orderData[i][9];
 
       if (!summary[product]) summary[product] = { total: 0 };
       summary[product].total += qty;
@@ -124,11 +145,12 @@ function getAdminData() {
       finance.total += rowPrice;
       if (payMethod === 'โอนเงิน' || payStatus === 'ชำระเงินแล้ว') finance.transfer += rowPrice;
       else if (payMethod === 'เงินสด') finance.cash += rowPrice;
+      else finance.unpaid += rowPrice;
 
       if (!ordersMap[orderId]) {
         ordersMap[orderId] = {
-          orderId: orderId, customer: data[i][2], items: [],
-          deliveryMethod: data[i][9], deliveryStatus: data[i][10], payMethod: payMethod
+          orderId: orderId, customer: orderData[i][2], items: [],
+          deliveryMethod: deliveryMethod, deliveryStatus: deliveryStatus, payMethod: payMethod
         };
       }
       ordersMap[orderId].items.push(`${product} x${qty}`);
@@ -136,6 +158,7 @@ function getAdminData() {
   }
 
   return {
+    products: products,
     summary: Object.keys(summary).map(k => ({ name: k, total: summary[k].total })),
     orders: Object.values(ordersMap),
     finance: finance,
@@ -147,11 +170,10 @@ function responseJSON(data, headers = {"Access-Control-Allow-Origin": "*"}) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// --- ฟังก์ชันอื่นๆ (manageProduct, createOrder, updateStatus) ให้ใช้ตามเดิมจาก v6 ---
+// --- CREATE ORDER ---
 function createOrder(data) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName('orderz') || ss.getSheets()[1];
-  const folder = DriveApp.getFolderById(SLIP_FOLDER_ID);
   
   const orderId = Utilities.getUuid();
   const timestamp = new Date();
@@ -166,7 +188,7 @@ function createOrder(data) {
       item.price * item.qty,
       'รอชำระเงิน',
       '', // slipUrl
-      '', // lineId
+      data.lineId || '', // lineId
       data.deliveryMethod,
       'ยังไม่ได้ส่ง',
       data.paymentMethod
@@ -177,6 +199,7 @@ function createOrder(data) {
   return { orderId: orderId };
 }
 
+// --- UPDATE ORDER STATUS ---
 function updateStatus(data) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName('orderz') || ss.getSheets()[1];
@@ -185,15 +208,16 @@ function updateStatus(data) {
   for (let i = 1; i < values.length; i++) {
     if (values[i][0] === data.orderId) {
       if (data.type === 'delivery') {
-        sheet.getRange(i + 1, 11).setValue(data.value); // Column K (deliveryStatus)
+        sheet.getRange(i + 1, 11).setValue(data.value); // Column K
       } else if (data.type === 'payment') {
-        sheet.getRange(i + 1, 12).setValue(data.value); // Column L (payMethod)
+        sheet.getRange(i + 1, 12).setValue(data.value); // Column L
       }
     }
   }
   return { success: true };
 }
 
+// --- MANAGE PRODUCTS (CRUD) ---
 function manageProduct(data) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName('seller (1)') || ss.getSheets()[0];
@@ -205,15 +229,15 @@ function manageProduct(data) {
   } else if (data.mode === 'update') {
     for (let i = 1; i < values.length; i++) {
       if (values[i][0] === data.id || values[i][1] === data.oldName) {
-        sheet.getRange(i + 1, 2).setValue(data.name); // Name
-        sheet.getRange(i + 1, 3).setValue(data.price); // Price
-        sheet.getRange(i + 1, 4).setValue(data.stock); // Stock
-        sheet.getRange(i + 1, 7).setValue(data.imageUrl || ''); // Image
+        sheet.getRange(i + 1, 2).setValue(data.name);
+        sheet.getRange(i + 1, 3).setValue(data.price);
+        sheet.getRange(i + 1, 4).setValue(data.stock);
+        sheet.getRange(i + 1, 7).setValue(data.imageUrl || '');
         break;
       }
     }
   } else if (data.mode === 'delete') {
-    for (let i = 1; i < values.length; i++) {
+    for (let i = values.length - 1; i >= 1; i--) {
       if (values[i][0] === data.id || values[i][1] === data.oldName) {
         sheet.deleteRow(i + 1);
         break;

@@ -3,190 +3,436 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>หลังบ้าน - ร้านพอใจขาย</title>
+  <title>Admin - ร้านพอใจขาย</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    html { scroll-behavior: smooth; }
+    .surface { background-color: #fff4ee; }
+    .card-surface { background-color: #ffffff; }
+    .blur-glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3); }
+    .shadow-xl-soft { box-shadow: 0 24px 48px rgba(0, 0, 0, 0.06); }
+    .badge { @apply inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold; }
+    .badge-live { @apply bg-green-100 text-green-700; }
+    .badge-success { @apply bg-green-100 text-green-700; }
+    .badge-pending { @apply bg-blue-100 text-blue-700; }
+    .badge-warning { @apply bg-orange-100 text-orange-700; }
+    .table-badge { 
+      display: inline-flex; 
+      width: 36px; 
+      height: 36px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-weight: 800;
+      font-size: 12px;
+      color: white;
+      background: linear-gradient(135deg, #f97f06 0%, #ff9d2c 100%);
+    }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen pb-10 font-sans">
-  
-  <div class="max-w-md mx-auto p-4 space-y-4">
-    <div class="flex justify-between items-center mb-2">
-      <div class="flex items-center space-x-2">
-        <h1 class="text-2xl font-black text-slate-800">📊 จัดการร้าน</h1>
-        <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse mt-1"></div>
+<body class="surface min-h-screen pb-20">
+
+  <!-- Header -->
+  <nav class="sticky top-0 z-50 blur-glass border-b border-white/20">
+    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-2xl font-black text-orange-600">👑 ADMIN DASHBOARD</h1>
+      <div class="flex space-x-2">
+        <button onclick="showView('dashboard')" class="dash-btn px-4 py-2 font-bold text-sm rounded-lg bg-orange-600 text-white transition">📊 แดชบอร์ด</button>
+        <button onclick="showView('kitchen')" class="kitchen-btn px-4 py-2 font-bold text-sm rounded-lg bg-slate-200 text-slate-600 transition">🚚 ครัว</button>
       </div>
-      <button onclick="loadAdminData()" id="btnRefresh" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold active:scale-95 transition">🔄 อัปเดต</button>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto p-4 space-y-6">
+
+    <!-- ==================== ADMIN AUTH ==================== -->
+    <div id="authSection" class="card-surface p-8 rounded-2xl shadow-xl-soft text-center">
+      <h2 class="text-2xl font-black text-slate-800 mb-4">🔐 Admin Authentication</h2>
+      <input type="password" id="adminPassword" placeholder="รหัสผ่านแอดมิน" class="w-full max-w-xs border-2 border-slate-300 p-4 rounded-lg mb-4 font-bold text-center">
+      <button onclick="verifyAdmin()" class="bg-orange-600 text-white px-8 py-3 rounded-lg font-black text-lg">เข้า</button>
     </div>
 
-    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-indigo-500">
-      <h2 class="font-bold text-slate-500 text-sm mb-3">🛠️ จัดการเมนู (เพิ่ม/ลบ/แก้ไข)</h2>
-      <div class="bg-indigo-50 p-4 rounded-2xl mb-4 shadow-inner">
-        <input type="hidden" id="prodId">
-        <input type="hidden" id="prodOldName">
-        <div class="grid grid-cols-2 gap-2 mb-3">
-          <input type="text" id="prodName" placeholder="ชื่อเมนู" class="col-span-2 p-2 rounded-lg border outline-none text-sm font-bold text-slate-700">
-          <input type="number" id="prodPrice" placeholder="ราคา (฿)" class="p-2 rounded-lg border outline-none text-sm text-center">
-          <input type="number" id="prodStock" placeholder="โควต้า/สต็อก" class="p-2 rounded-lg border outline-none text-sm text-center">
-          <input type="text" id="prodImg" placeholder="URL รูปภาพ (ถ้ามี)" class="col-span-2 p-2 rounded-lg border outline-none text-sm text-slate-500">
+    <!-- ==================== DASHBOARD VIEW ==================== -->
+    <div id="dashboardView" class="hidden space-y-6">
+
+      <!-- Monthly Chart -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+        <h2 class="font-black text-xl text-slate-800 mb-6">📈 ยอดขายรายเดือน</h2>
+        <canvas id="monthlyChart" height="200"></canvas>
+      </div>
+
+      <!-- Financial Summary Grid (Bento Layout) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+          <p class="text-sm font-bold text-slate-500 uppercase mb-2">ยอดขายวันนี้</p>
+          <p class="text-3xl font-black text-orange-600" id="finTotal">0</p>
+          <p class="text-xs text-slate-400 mt-2">฿</p>
         </div>
-        <div class="flex space-x-2">
-          <button onclick="saveProduct()" id="btnSaveProd" class="flex-1 bg-indigo-500 text-white py-2 rounded-xl font-bold shadow-md active:scale-95 transition">💾 บันทึก</button>
-          <button onclick="clearProductForm()" class="bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold active:scale-95 transition">ล้าง</button>
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+          <p class="text-sm font-bold text-slate-500 uppercase mb-2">โอนเงิน</p>
+          <p class="text-3xl font-black text-blue-600" id="finTransfer">0</p>
+          <span class="badge badge-pending mt-2">💳</span>
+        </div>
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+          <p class="text-sm font-bold text-slate-500 uppercase mb-2">เงินสด</p>
+          <p class="text-3xl font-black text-green-600" id="finCash">0</p>
+          <span class="badge badge-success mt-2">💵</span>
+        </div>
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+          <p class="text-sm font-bold text-slate-500 uppercase mb-2">ค้างจ่าย</p>
+          <p class="text-3xl font-black text-red-600" id="finUnpaid">0</p>
+          <span class="badge badge-warning mt-2">⏳</span>
         </div>
       </div>
-      <div id="productCrudList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
-    </div>
 
-    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-green-500">
-      <h2 class="font-bold text-slate-500 text-sm mb-3">💰 สรุปการเงินวันนี้</h2>
-      <div class="text-center mb-4">
-        <p class="text-xs text-slate-400">ยอดขายรวม</p>
-        <p class="text-4xl font-black text-green-600"><span id="finTotal">0</span> ฿</p>
+      <!-- Product Management -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+        <h2 class="font-black text-xl text-slate-800 mb-6">🛠️ จัดการเมนู</h2>
+        
+        <div class="bg-slate-50 p-6 rounded-xl mb-6 space-y-4">
+          <input type="hidden" id="prodId">
+          <input type="text" id="prodName" placeholder="ชื่อเมนู" class="w-full border-2 border-slate-300 p-3 rounded-lg font-bold">
+          <div class="grid grid-cols-3 gap-3">
+            <input type="number" id="prodPrice" placeholder="ราคา" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-center">
+            <input type="number" id="prodStock" placeholder="โควต้า" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-center">
+            <input type="text" id="prodImg" placeholder="URL รูป" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-sm">
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="saveProduct()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">💾 บันทึก</button>
+            <button onclick="clearProduct()" class="flex-1 bg-slate-300 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-400">ล้าง</button>
+          </div>
+        </div>
+
+        <div id="productCrudList" class="space-y-3"></div>
       </div>
-      <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold border-t pt-3">
-        <div><p class="text-slate-400">โอนแล้ว</p><p id="finTransfer" class="text-blue-500 text-lg">0</p></div>
-        <div><p class="text-slate-400">เงินสด</p><p id="finCash" class="text-emerald-500 text-lg">0</p></div>
-        <div><p class="text-slate-400">ค้างจ่าย</p><p id="finUnpaid" class="text-red-500 text-lg">0</p></div>
+
+      <!-- Quick Walk-in Sales -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+        <h2 class="font-black text-xl text-slate-800 mb-4">⚡ ขายหน้าร้าน</h2>
+        <div id="walkInButtons" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
       </div>
+
     </div>
 
-    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-blue-500">
-      <h2 class="font-bold text-slate-500 text-sm mb-3">📦 ยอดผลิตรวม</h2>
-      <div id="productionSummary" class="space-y-2 mb-4"></div>
-      <h2 class="font-bold text-slate-500 text-sm mb-2 border-t pt-4">+ กดขายหน้าร้าน (เงินสด)</h2>
-      <div class="grid grid-cols-2 gap-2" id="walkInButtons"></div>
+    <!-- ==================== KITCHEN VIEW ==================== -->
+    <div id="kitchenView" class="hidden space-y-6">
+
+      <div class="grid grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+          <p class="text-4xl font-black text-orange-600" id="activeOrderCount">0</p>
+          <p class="text-xs font-bold text-slate-500 uppercase mt-2">ออเดอร์ที่รอส่ง</p>
+        </div>
+      </div>
+
+      <!-- Order Checklist with Table Numbers -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="font-black text-xl text-slate-800">🚚 รายการส่งของ</h2>
+          <button onclick="loadAdminData()" class="px-4 py-2 rounded-lg font-bold text-xs bg-slate-100 hover:bg-slate-200">🔄 รีเฟรช</button>
+        </div>
+        <div id="deliveryList" class="space-y-4"></div>
+      </div>
+
+      <!-- Inventory Status -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+        <h2 class="font-black text-xl text-slate-800 mb-6">📊 สต็อกเคาท์เตอร์</h2>
+        <div id="inventoryList" class="space-y-3"></div>
+      </div>
+
     </div>
 
-    <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-purple-500">
-      <h2 class="font-bold text-slate-500 text-sm mb-3">🚚 รายการส่งของวันนี้</h2>
-      <div id="deliveryList" class="space-y-3"></div>
-    </div>
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxobiQN1X8Nrjj7_m_zLDKjCHil8RuQXHx6j9dDlNUH6iSQi2whD2GQmUda8UUX-iPQ-g/exec"; 
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxobiQN1X8Nrjj7_m_zLDKjCHil8RuQXHx6j9dDlNUH6iSQi2whD2GQmUda8UUX-iPQ-g/exec";
+    
+    let adminAuth = false;
     let allProducts = [];
 
-    // ฟังก์ชันจัดการไฟสถานะ Admin
-    function setApiStatus(isOnline) {
-      const dot = document.getElementById('statusDot');
-      if (isOnline) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e] mt-1";
+    function showView(view) {
+      if(!adminAuth) { alert('⚠️ กรุณาเข้าสู่ระบบก่อน'); return; }
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('kitchenView').classList.add('hidden');
+      document.getElementById(view + 'View').classList.remove('hidden');
+
+      document.querySelectorAll('nav button').forEach(b => b.classList.add('bg-slate-200', 'text-slate-600'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('bg-orange-600', 'text-white'));
+      if(view === 'dashboard') document.querySelector('.dash-btn').classList.add('bg-orange-600', 'text-white');
+      if(view === 'kitchen') document.querySelector('.kitchen-btn').classList.add('bg-orange-600', 'text-white');
+
+      if(view === 'dashboard' || view === 'kitchen') loadAdminData();
+    }
+
+    function verifyAdmin() {
+      const pwd = document.getElementById('adminPassword').value;
+      if(pwd === '12399') {
+        adminAuth = true;
+        document.getElementById('authSection').classList.add('hidden');
+        loadAdminData();
+        showView('dashboard');
       } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444] mt-1";
+        alert('❌ รหัสผ่านไม่ถูกต้อง');
       }
     }
 
-    // Admin password authentication
-    const ADMIN_PASSWORD = '12399';
-
-    window.onload = function() {
-      const password = prompt("กรุณาป้อนรหัสผ่านแอดมิน:");
-      if (password !== ADMIN_PASSWORD) {
-        alert("รหัสผ่านไม่ถูกต้อง!");
-        window.location.href = "index.html"; // Redirect to main page
-        return;
-      }
-      // Proceed to load admin data
-      loadAdminData();
-    };
-
     async function loadAdminData() {
-      const btn = document.getElementById("btnRefresh");
-      btn.innerText = "⏳ กำลังโหลด...";
-      document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse mt-1"; // รีเซ็ตเป็นเหลือง
-      
       try {
-        const response = await fetch(GAS_URL + "?action=getAdminData&password=" + ADMIN_PASSWORD);
-        if(!response.ok) throw new Error("Network Error");
-        const result = await response.json();
-        
-        allProducts = result.data.products;
+        const res = await fetch(GAS_URL + '?action=getAdminData&password=12399');
+        const result = await res.json();
+        if(result.status !== 'success') {
+          alert('❌ ' + result.message);
+          return;
+        }
+        const data = result.data;
+
+        // Financial
+        document.getElementById('finTotal').innerText = data.finance.total;
+        document.getElementById('finTransfer').innerText = data.finance.transfer;
+        document.getElementById('finCash').innerText = data.finance.cash;
+        document.getElementById('finUnpaid').innerText = data.finance.unpaid || 0;
+
+        // Products
+        allProducts = data.products || [];
         renderProductCrud();
-        document.getElementById("finTotal").innerText = result.data.finance.total;
-        document.getElementById("finTransfer").innerText = result.data.finance.transfer;
-        document.getElementById("finCash").innerText = result.data.finance.cash;
-        document.getElementById("finUnpaid").innerText = result.data.finance.unpaid;
-        renderProduction(result.data.summary);
-        renderWalkInButtons(result.data.summary);
-        renderDelivery(result.data.orders);
-        
-        setApiStatus(true); // 🟢 สีเขียว
-      } catch(e) { 
-        alert("ขาดการเชื่อมต่อกับระบบ 🔴"); 
-        setApiStatus(false); // 🔴 สีแดง
+        renderWalkIn();
+
+        // Delivery & Inventory
+        renderDelivery(data.orders || []);
+        renderInventory();
+
+        // Counters
+        document.getElementById('activeOrderCount').innerText = (data.orders || []).filter(o => o.deliveryStatus !== 'ส่งแล้ว').length;
+
+        // Chart
+        renderChart(data.monthlyStats || {});
+      } catch(e) {
+        alert('❌ เกิดข้อผิดพลาด: ' + e);
       }
-      btn.innerText = "🔄 อัปเดต";
     }
 
     function renderProductCrud() {
-      document.getElementById("productCrudList").innerHTML = allProducts.map(p => `
-        <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-sm">
+      const list = document.getElementById('productCrudList');
+      if(allProducts.length === 0) {
+        list.innerHTML = '<p class="text-center text-slate-400 py-4">ยังไม่มีเมนู</p>';
+        return;
+      }
+      list.innerHTML = allProducts.map((p, i) => `
+        <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-orange-400 flex justify-between items-center">
           <div>
-            <p class="font-black text-slate-700">${p.name}</p>
-            <p class="text-xs text-slate-500">${p.price}฿ | โควต้า: <span class="${p.stock > 0 ? 'text-green-600' : 'text-red-500'} font-bold">${p.stock}</span></p>
+            <p class="font-bold text-slate-800">${p.name}</p>
+            <p class="text-sm"><span class="text-orange-600 font-bold">${p.price}฿</span> | โควต้า: <span class="font-bold">${p.stock}</span></p>
           </div>
-          <div class="space-x-1 flex">
-            <button onclick='editProduct(${JSON.stringify(p)})' class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-lg transition">✏️</button>
-            <button onclick="deleteProduct('${p.id}', '${p.name}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg transition">🗑️</button>
+          <div class="flex space-x-2">
+            <button onclick="editProduct(${i})" class="px-3 py-2 rounded-lg font-bold text-xs bg-blue-100 text-blue-700">✏️ แก้ไข</button>
+            <button onclick="deleteProduct('${p.name}')" class="px-3 py-2 rounded-lg font-bold text-xs bg-red-100 text-red-700">🗑️ ลบ</button>
           </div>
         </div>
       `).join('');
     }
 
-    function editProduct(p) {
-      document.getElementById("prodId").value = p.id;
-      document.getElementById("prodOldName").value = p.name;
-      document.getElementById("prodName").value = p.name;
-      document.getElementById("prodPrice").value = p.price;
-      document.getElementById("prodStock").value = p.stock;
-      document.getElementById("prodImg").value = p.imageUrl;
-      document.getElementById("btnSaveProd").innerText = "🔄 อัปเดตเมนู";
+    function editProduct(idx) {
+      const p = allProducts[idx];
+      document.getElementById('prodId').value = p.id || '';
+      document.getElementById('prodName').value = p.name;
+      document.getElementById('prodPrice').value = p.price;
+      document.getElementById('prodStock').value = p.stock;
+      document.getElementById('prodImg').value = p.imageUrl || '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function clearProductForm() {
-      document.getElementById("prodId").value = ""; document.getElementById("prodOldName").value = "";
-      document.getElementById("prodName").value = ""; document.getElementById("prodPrice").value = "";
-      document.getElementById("prodStock").value = ""; document.getElementById("prodImg").value = "";
-      document.getElementById("btnSaveProd").innerText = "💾 บันทึก";
+    function clearProduct() {
+      document.getElementById('prodId').value = '';
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodPrice').value = '';
+      document.getElementById('prodStock').value = '';
+      document.getElementById('prodImg').value = '';
     }
 
     async function saveProduct() {
-      const id = document.getElementById("prodId").value; const oldName = document.getElementById("prodOldName").value;
-      const name = document.getElementById("prodName").value; const price = document.getElementById("prodPrice").value;
-      const stock = document.getElementById("prodStock").value; const img = document.getElementById("prodImg").value;
-      if(!name || !price || !stock) return alert("ใส่ข้อมูลให้ครบครับ");
-      const btn = document.getElementById("btnSaveProd"); btn.innerText = "⏳..."; btn.disabled = true;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', password: ADMIN_PASSWORD, data: { mode: id||oldName?'update':'create', id, oldName, name, price, stock, imageUrl: img }})});
-      clearProductForm(); loadAdminData(); btn.disabled = false;
+      const id = document.getElementById('prodId').value;
+      const oldName = id ? allProducts.find(p => p.id === id)?.name : '';
+      const name = document.getElementById('prodName').value;
+      const price = parseInt(document.getElementById('prodPrice').value) || 0;
+      const stock = parseInt(document.getElementById('prodStock').value) || 0;
+      const imageUrl = document.getElementById('prodImg').value;
+
+      if(!name || price === 0 || stock === 0) { alert('⚠️ ใส่ข้อมูลให้ครบ'); return; }
+
+      try {
+        const mode = id ? 'update' : 'create';
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'manageProduct',
+            password: '12399',
+            data: { mode, id, oldName, name, price, stock, imageUrl }
+          })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+          alert('✅ บันทึกสำเร็จ');
+          clearProduct();
+          loadAdminData();
+        } else {
+          alert('❌ ' + result.message);
+        }
+      } catch(e) {
+        alert('❌ ' + e);
+      }
     }
 
-    async function deleteProduct(id, name) {
-      if(!confirm(`⚠️ ลบเมนู "${name}"?`)) return;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', password: ADMIN_PASSWORD, data: { mode: 'delete', id, oldName: name } }) });
-      loadAdminData();
+    async function deleteProduct(name) {
+      if(!confirm(`❓ ลบเมนู "${name}"?`)) return;
+      try {
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'manageProduct',
+            password: '12399',
+            data: { mode: 'delete', oldName: name }
+          })
+        });
+        loadAdminData();
+      } catch(e) {
+        alert('❌ ' + e);
+      }
     }
 
-    function renderProduction(summary) { document.getElementById("productionSummary").innerHTML = summary.map(item => `<div class="flex justify-between items-center border-b border-slate-50 pb-2"><span class="font-bold text-slate-700">${item.name}</span><span class="text-lg font-black text-blue-600 bg-blue-50 px-3 rounded-lg">${item.total}</span></div>`).join(''); }
-    function renderWalkInButtons(summary) { document.getElementById("walkInButtons").innerHTML = summary.map(item => `<button onclick="quickSale('${item.name}', ${item.price})" class="bg-orange-50 hover:bg-orange-100 text-orange-700 py-2 rounded-xl text-xs font-bold border border-orange-200 transition active:scale-95">${item.name}</button>`).join(''); }
+    function renderWalkIn() {
+      const buttons = document.getElementById('walkInButtons');
+      buttons.innerHTML = allProducts.slice(0, 8).map(p => `
+        <button onclick="quickSale('${p.name}', ${p.price})" class="p-4 rounded-lg font-bold text-sm bg-gradient-to-br from-orange-100 to-orange-200 text-orange-700 hover:shadow-lg transition active:scale-95">
+          <div>${p.name}</div>
+          <div class="text-xs mt-1">${p.price}฿</div>
+        </button>
+      `).join('');
+    }
+
     async function quickSale(name, price) {
-      if(!confirm(`บันทึกขายหน้าร้าน: ${name}?`)) return;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'createOrder', password: ADMIN_PASSWORD, data: { customerName: "ขายหน้างาน (Walk-in)", cart: [{name: name, qty: 1, price: price}], paymentMethod: "เงินสด", deliveryMethod: "รับเองหน้างาน" }})});
-      loadAdminData();
+      if(!confirm(`ขายหน้าร้าน: ${name}?`)) return;
+      try {
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'createOrder',
+            password: '12399',
+            data: {
+              customerName: 'Walk-in',
+              cart: [{ name, qty: 1, price }],
+              deliveryMethod: 'รับเองหน้างาน',
+              paymentMethod: 'เงินสด'
+            }
+          })
+        });
+        loadAdminData();
+      } catch(e) {
+        alert('❌ ' + e);
+      }
     }
 
     function renderDelivery(orders) {
-      document.getElementById("deliveryList").innerHTML = orders.map(order => {
-        const isDelivered = order.deliveryStatus === 'ส่งแล้ว';
-        const isPaid = order.payMethod === 'โอนเงิน' || order.payMethod === 'เงินสด';
-        return `<div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-sm"><div class="flex justify-between mb-1"><span class="font-black text-slate-800">${order.customer}</span><span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 rounded">${order.deliveryMethod}</span></div><div class="text-slate-500 mb-3">${order.items.join(', ')}</div><div class="flex space-x-2"><button onclick="updateStatus('${order.orderId}', 'delivery', '${isDelivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="flex-1 py-2 rounded-lg font-bold text-xs transition ${isDelivered ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600'}">${isDelivered ? '✅ ส่งแล้ว' : '📦 กดเมื่อส่งของ'}</button><select onchange="updateStatus('${order.orderId}', 'payment', this.value)" class="flex-1 border-none rounded-lg font-bold text-xs text-center outline-none ${isPaid ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-600'}"><option value="ค้างจ่าย" ${order.payMethod==='ค้างจ่าย'?'selected':''}>❌ ค้างจ่าย</option><option value="โอนเงิน" ${order.payMethod==='โอนเงิน'?'selected':''}>📱 โอนเงิน</option><option value="เงินสด" ${order.payMethod==='เงินสด'?'selected':''}>💵 เงินสด</option></select></div></div>`}).join('');
+      const list = document.getElementById('deliveryList');
+      if(orders.length === 0) {
+        list.innerHTML = '<p class="text-center text-slate-400 py-4">ไม่มีออเดอร์วันนี้</p>';
+        return;
+      }
+      list.innerHTML = orders.map((o, i) => {
+        const delivered = o.deliveryStatus === 'ส่งแล้ว';
+        return `
+          <div class="bg-slate-50 p-4 rounded-lg border-l-4 ${delivered ? 'border-green-400' : 'border-blue-400'}">
+            <div class="flex items-start space-x-4 mb-3">
+              <div class="${delivered ? 'opacity-50' : ''} flex items-start space-x-3 flex-grow">
+                <div class="table-badge">T${(i+1).toString().padStart(2,'0')}</div>
+                <div>
+                  <p class="font-black text-slate-800">${o.customer}</p>
+                  <p class="text-sm text-slate-600 mt-1">${o.items.join(', ')}</p>
+                </div>
+              </div>
+              <span class="badge ${delivered ? 'badge-success' : 'badge-pending'}">${delivered ? '✅ ส่งแล้ว' : '⏳ รอส่ง'}</span>
+            </div>
+            <button onclick="updateStatus('${o.orderId}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="w-full py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}">
+              ${delivered ? '↩️ ยกเลิก' : '📦 เช็กส่งของ'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderInventory() {
+      const list = document.getElementById('inventoryList');
+      list.innerHTML = allProducts.map(p => `
+        <div class="bg-slate-50 p-3 rounded-lg flex items-center space-x-4">
+          <p class="font-bold text-slate-800 flex-grow">${p.name}</p>
+          <div class="flex items-center space-x-2">
+            <input type="number" value="${p.stock}" onchange="updateInventory('${p.name}', this.value)" class="w-16 border-2 border-slate-300 p-2 rounded-lg text-center font-bold text-sm">
+            <span class="text-xs font-bold text-slate-500">ชิ้น</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function updateInventory(name, newStock) {
+      try {
+        const p = allProducts.find(x => x.name === name);
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'manageProduct',
+            password: '12399',
+            data: { mode: 'update', id: p.id, oldName: name, name, price: p.price, stock: parseInt(newStock), imageUrl: p.imageUrl }
+          })
+        });
+      } catch(e) {
+        alert('❌ ' + e);
+      }
     }
 
     async function updateStatus(orderId, type, value) {
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', password: ADMIN_PASSWORD, data: { orderId, type, value }}) });
-      loadAdminData(); 
+      try {
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'updateStatus',
+            password: '12399',
+            data: { orderId, type, value }
+          })
+        });
+        loadAdminData();
+      } catch(e) {
+        alert('❌ ' + e);
+      }
     }
 
-    loadAdminData();
+    function renderChart(stats) {
+      const ctx = document.getElementById('monthlyChart');
+      if(!ctx) return;
+      if(window.myChart) window.myChart.destroy();
+      const labels = Object.keys(stats).sort().slice(-6);
+      const data = labels.map(k => stats[k]);
+      window.myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'บาท',
+            data,
+            backgroundColor: '#f97f06',
+            borderRadius: 8,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
   </script>
+
 </body>
 </html>

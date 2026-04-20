@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Modern Hearth - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#7db3ff",
+                        "tertiary": "#005caa",
+                        "error-container": "#f95630",
+                        "inverse-primary": "#f97f06",
+                        "on-error": "#ffefec",
+                        "on-primary-fixed": "#000000",
+                        "secondary-container": "#9df197",
+                        "on-tertiary-fixed": "#001834",
+                        "surface-tint": "#914700",
+                        "on-tertiary": "#eef3ff",
+                        "secondary": "#176a21",
+                        "primary-container": "#f97f06",
+                        "surface-variant": "#ffd5b1",
+                        "surface-container": "#ffe3cd",
+                        "on-primary-container": "#3b1900",
+                        "inverse-on-surface": "#c59363",
+                        "secondary-dim": "#025d16",
+                        "on-tertiary-fixed-variant": "#003a6e",
+                        "background": "#fff4ee",
+                        "primary-fixed": "#f97f06",
+                        "on-surface": "#472701",
+                        "surface-container-high": "#ffdcbf",
+                        "on-error-container": "#520c00",
+                        "inverse-surface": "#1a0a00",
+                        "on-secondary-fixed": "#00460e",
+                        "on-background": "#472701",
+                        "surface-container-low": "#ffeee1",
+                        "on-secondary-container": "#005c15",
+                        "primary-dim": "#7f3d00",
+                        "on-secondary": "#d1ffc8",
+                        "on-surface-variant": "#7c5329",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#4a2100",
+                        "tertiary-fixed": "#7db3ff",
+                        "surface-container-highest": "#ffd5b1",
+                        "secondary-fixed": "#9df197",
+                        "secondary-fixed-dim": "#90e28a",
+                        "tertiary-dim": "#005095",
+                        "error-dim": "#b92902",
+                        "surface": "#fff4ee",
+                        "primary-fixed-dim": "#e67400",
+                        "on-primary": "#fff0e8",
+                        "surface-bright": "#fff4ee",
+                        "error": "#b02500",
+                        "tertiary-fixed-dim": "#60a5ff",
+                        "on-tertiary-container": "#00315f",
+                        "on-secondary-fixed-variant": "#12661e",
+                        "primary": "#914700",
+                        "outline-variant": "#d7a372"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-orange-50/90 dark:bg-stone-950/90 font-['Plus_Jakarta_Sans'] font-bold tracking-tight docked full-width top-0 sticky z-50 no-border shadow-none bg-orange-100/50 dark:bg-stone-900/50 flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-orange-700 dark:text-orange-500" data-icon="restaurant_menu">restaurant_menu</span>
+<h1 class="text-xl font-extrabold text-amber-950 dark:text-orange-50">The Modern Hearth</h1>
+</div>
+<div class="h-10 w-10 rounded-full bg-surface-container-highest border-2 border-primary-container overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="professional portrait of a restaurant manager in a modern kitchen setting, soft natural lighting, warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu2ZbEDJzZet2uUaC5Zd9vQRksOinn1ymg6Mn8IF3QpqZki_IIzts1LuYyBoXZ9Exe4Qa3ulMsLjzcvl1IFBCoHSL-OAkAn9PqkmzCYh8EKgAdO5paLvzEBMiPgp1ZaMi4BbeAMSp85jI5z3hi2sgaLcmDMlsGwcMV188W9B4yl0oST_AxCpFx1AkI8DTZ4HHqEcs8Fnr8DEM5H41aseQFc64esFHjIIQ8OcleOiU_Fhre2jMW64G9vhG0b_e5H04UbiMM1TZ8zfM"/>
+</div>
+</header>
+<main class="max-w-5xl mx-auto px-6 py-8 space-y-10">
+<!-- Header Section -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<p class="text-on-surface-variant font-medium tracking-wide mb-1">MANAGEMENT DASHBOARD</p>
+<h2 class="text-4xl font-extrabold text-on-surface tracking-tight">Daily Performance</h2>
+</div>
+<div class="flex gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="fiber_manual_record" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+                    Live Updates
+                </span>
+</div>
+</section>
+<!-- Top Section: Monthly Sales Trend (Bento Grid Style) -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-surface-container-low p-8 rounded-[2rem] space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="text-xl font-bold">Monthly Sales Trend</h3>
+<div class="flex gap-4 text-sm font-semibold text-on-surface-variant">
+<span class="flex items-center gap-1"><div class="w-3 h-3 bg-primary rounded-full"></div> Revenue</span>
+<span class="flex items-center gap-1"><div class="w-3 h-3 bg-surface-variant rounded-full"></div> Target</span>
+</div>
+</div>
+<!-- Simple Bar Chart Visualization -->
+<div class="flex items-end justify-between h-48 gap-2 pt-4">
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary rounded-t-xl" style="height: 60%;"></div>
+<span class="text-xs font-bold opacity-60">Jan</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary rounded-t-xl" style="height: 75%;"></div>
+<span class="text-xs font-bold opacity-60">Feb</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary rounded-t-xl" style="height: 90%;"></div>
+<span class="text-xs font-bold opacity-60">Mar</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary-container rounded-t-xl" style="height: 100%;"></div>
+<span class="text-xs font-bold">Apr</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-surface-variant rounded-t-xl" style="height: 40%;"></div>
+<span class="text-xs font-bold opacity-40">May</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-surface-variant rounded-t-xl" style="height: 30%;"></div>
+<span class="text-xs font-bold opacity-40">Jun</span>
+</div>
+</div>
+</div>
+<!-- Stats Highlight -->
+<div class="bg-primary text-on-primary p-8 rounded-[2rem] flex flex-col justify-between overflow-hidden relative">
+<div class="relative z-10">
+<h3 class="text-lg font-semibold opacity-80">Total Sales</h3>
+<p class="text-5xl font-extrabold mt-2 tracking-tighter">$42,850</p>
+<div class="mt-4 flex items-center gap-2 text-sm bg-white/20 w-fit px-3 py-1 rounded-full backdrop-blur-md">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                        12.5% vs Last Month
+                    </div>
+</div>
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary-container rounded-full blur-3xl opacity-50"></div>
+<button class="relative z-10 w-full mt-8 bg-on-primary text-primary font-bold py-4 rounded-2xl hover:scale-[0.98] transition-transform">
+                    Download Report
+                </button>
+</div>
+</section>
+<!-- Middle Section: Daily Financial Summary -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest p-8 rounded-[2rem] flex items-center gap-6 group hover:bg-surface-container-low transition-colors duration-300">
+<div class="w-16 h-16 rounded-3xl bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-3xl" data-icon="payments">payments</span>
+</div>
+<div class="flex-1">
+<h4 class="text-on-surface-variant font-bold text-sm tracking-widest uppercase">Cash Revenue</h4>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-3xl font-extrabold">$2,450</p>
+<span class="text-secondary font-bold text-sm">342 Sales</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-[2rem] flex items-center gap-6 group hover:bg-surface-container-low transition-colors duration-300">
+<div class="w-16 h-16 rounded-3xl bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined text-3xl" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<div class="flex-1">
+<h4 class="text-on-surface-variant font-bold text-sm tracking-widest uppercase">Transfer Revenue</h4>
+<div class="flex items-baseline gap-2 mt-1">
+<p class="text-3xl font-extrabold">$5,890</p>
+<span class="text-tertiary font-bold text-sm">118 Sales</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Section: Quick Walk-in Sale -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="text-2xl font-extrabold tracking-tight">Quick Walk-in Sale</h3>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                    View Full Menu
+                    <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Quick Sale Cards -->
+<button class="bg-surface-container-low p-4 rounded-3xl flex flex-col items-center gap-3 hover:bg-primary hover:text-on-primary transition-all duration-300 group">
+<div class="w-20 h-20 rounded-2xl overflow-hidden mb-2">
+<img alt="Artisan Croissant" class="w-full h-full object-cover" data-alt="golden brown flaky artisan croissant on a white ceramic plate, professional food photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK_UASjDA5C8p4E4f0BYo_g_-e-xr5omVJYDwUqYT6G5aCOHtg54XpqpjEWrcxFKolPvwaxCpQcTRTgBkC1E-X1gFDdG1xTnYMfV6PUTlMcOnvg-XibJ2BT4ZF5yn9aeYyoziMu8MvVlgU1MPkTjqceKs8Zof0fTvDQGecwfoEt94K5uIlifGVm58WHa3OR-kljCv1sPwFm8H6R6nPoYQc-Q6gvBVTFWXijt_ZooQkNst9ymA8Nkyr_5_GMrfaVf36HerbucEQ5nk"/>
+</div>
+<div class="text-center">
+<p class="font-bold">Croissant</p>
+<p class="text-sm opacity-60 font-semibold group-hover:text-on-primary">$4.50</p>
+</div>
+<div class="bg-primary-container text-on-primary-container w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+</div>
+</button>
+<button class="bg-surface-container-low p-4 rounded-3xl flex flex-col items-center gap-3 hover:bg-primary hover:text-on-primary transition-all duration-300 group">
+<div class="w-20 h-20 rounded-2xl overflow-hidden mb-2">
+<img alt="Cold Brew" class="w-full h-full object-cover" data-alt="chilled glass of dark cold brew coffee with clear ice cubes, condensation on glass, moody lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr58iMl-6qpN6JBZlqaHSVSR5cVWWcRNBnHFA6qzwXBKmOtfl_5dbGfUJyj_yR0DY5vqn9brlurJYfdjuYgVcUEvBZRj2E0PmmfyKF1aDiOCfC_ZlDbQtKag7kATXe3C1PKbpMiEWVHGvKtsuaSqh22P1JCJuI6eXVFqYXkPrT_BGLY3JY7UMKxtrVqXFl7KUuqcdf_zBP6NJLHjo7I2sdG-62K3ABBhjJZI59pKcjNf5mQNDrjHHrJF4FbM-YidhJnzRag492mno"/>
+</div>
+<div class="text-center">
+<p class="font-bold">Cold Brew</p>
+<p class="text-sm opacity-60 font-semibold group-hover:text-on-primary">$6.00</p>
+</div>
+<div class="bg-primary-container text-on-primary-container w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+</div>
+</button>
+<button class="bg-surface-container-low p-4 rounded-3xl flex flex-col items-center gap-3 hover:bg-primary hover:text-on-primary transition-all duration-300 group">
+<div class="w-20 h-20 rounded-2xl overflow-hidden mb-2">
+<img alt="Sourdough" class="w-full h-full object-cover" data-alt="rustic sourdough loaf with scored crust on a wooden board, flour dusted, natural window light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHISWVM-Uq_t_kfwe3lHunGQ3WH_SECbhpowGY6iFA3uN4M14nW1oGg626jNq1Hvk1M15U0jo4z52dnJzdxYLUTvQw8Zu9WaKsyfndGjRVi0j6m6iMZ5GLiz4OMobZiGD-szWzQ7jbarHwCTRCe5_3o8wPlAVxj3QrX4wEzYB5Au1vQuQzeiLk5SfcOzAabZjur9rzOEtGLT7ceYHoi-lf8snA42M7F5pVfpMOpFMUfMEwsSw-kSIthwqqizkY6q9EWCWh0sSVdG0"/>
+</div>
+<div class="text-center">
+<p class="font-bold">Sourdough</p>
+<p class="text-sm opacity-60 font-semibold group-hover:text-on-primary">$8.50</p>
+</div>
+<div class="bg-primary-container text-on-primary-container w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+</div>
+</button>
+<button class="bg-surface-container-low p-4 rounded-3xl flex flex-col items-center gap-3 hover:bg-primary hover:text-on-primary transition-all duration-300 group">
+<div class="w-20 h-20 rounded-2xl overflow-hidden mb-2">
+<img alt="Avocado Toast" class="w-full h-full object-cover" data-alt="thick slice of toasted bread topped with smashed avocado and chili flakes, close-up, vibrant green tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjAYyTPZIEtorofc8JmlY3zgICAR7OjnvHgI_pI9boSn4eW254Fd7xnEMFAvi_EvUUuoYPd0YU1RFS1h8adamG9mOIulUdTUghu4m5vsLGVKSpkL-ItJp96R7pokn_YyfUkfld9i-Z9NN_NGWiWglFD7pwQ-Xr8uN5aftIsvUVdTrMNZT6HmzrSBkDKy6y61mKj-kweQgc4NTG0smkpT8rIPnYlH-sc-DQGPyvMxv2w0jHRRTkw1eXgc0ng7oszZ8YxdqPkaElC7o"/>
+</div>
+<div class="text-center">
+<p class="font-bold">Avo Toast</p>
+<p class="text-sm opacity-60 font-semibold group-hover:text-on-primary">$12.00</p>
+</div>
+<div class="bg-primary-container text-on-primary-container w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+</div>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-orange-50/80 dark:bg-stone-950/80 backdrop-blur-xl fixed bottom-0 w-full z-50 pb-safe shadow-[0_-4px_24px_rgba(71,39,1,0.06)] no-border space-y-2 flex justify-around items-center px-4 py-3">
+<!-- Today Tab -->
+<a class="flex flex-col items-center justify-center text-amber-900/70 dark:text-stone-400 px-5 py-2 hover:bg-orange-100/50 dark:hover:bg-stone-800/50 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="today">today</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold">Today</span>
+</a>
+<!-- Order Tab -->
+<a class="flex flex-col items-center justify-center text-amber-900/70 dark:text-stone-400 px-5 py-2 hover:bg-orange-100/50 dark:hover:bg-stone-800/50 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="lunch_dining">lunch_dining</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold">Order</span>
+</a>
+<!-- Management Tab (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-orange-700 to-orange-500 text-white rounded-full px-5 py-2 scale-95 duration-200 ease-out shadow-lg" href="#">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold">Management</span>
+</a>
+</nav>
+</body></html>

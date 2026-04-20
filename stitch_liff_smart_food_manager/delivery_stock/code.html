@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Modern Hearth - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#7db3ff",
+                        "tertiary": "#005caa",
+                        "error-container": "#f95630",
+                        "inverse-primary": "#f97f06",
+                        "on-error": "#ffefec",
+                        "on-primary-fixed": "#000000",
+                        "secondary-container": "#9df197",
+                        "on-tertiary-fixed": "#001834",
+                        "surface-tint": "#914700",
+                        "on-tertiary": "#eef3ff",
+                        "secondary": "#176a21",
+                        "primary-container": "#f97f06",
+                        "surface-variant": "#ffd5b1",
+                        "surface-container": "#ffe3cd",
+                        "on-primary-container": "#3b1900",
+                        "inverse-on-surface": "#c59363",
+                        "secondary-dim": "#025d16",
+                        "on-tertiary-fixed-variant": "#003a6e",
+                        "background": "#fff4ee",
+                        "primary-fixed": "#f97f06",
+                        "on-surface": "#472701",
+                        "surface-container-high": "#ffdcbf",
+                        "on-error-container": "#520c00",
+                        "inverse-surface": "#1a0a00",
+                        "on-secondary-fixed": "#00460e",
+                        "on-background": "#472701",
+                        "surface-container-low": "#ffeee1",
+                        "on-secondary-container": "#005c15",
+                        "primary-dim": "#7f3d00",
+                        "on-secondary": "#d1ffc8",
+                        "on-surface-variant": "#7c5329",
+                        "surface-dim": "#ffca9b",
+                        "outline": "#9b6d41",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#4a2100",
+                        "tertiary-fixed": "#7db3ff",
+                        "surface-container-highest": "#ffd5b1",
+                        "secondary-fixed": "#9df197",
+                        "secondary-fixed-dim": "#90e28a",
+                        "tertiary-dim": "#005095",
+                        "error-dim": "#b92902",
+                        "surface": "#fff4ee",
+                        "primary-fixed-dim": "#e67400",
+                        "on-primary": "#fff0e8",
+                        "surface-bright": "#fff4ee",
+                        "error": "#b02500",
+                        "tertiary-fixed-dim": "#60a5ff",
+                        "on-tertiary-container": "#00315f",
+                        "on-secondary-fixed-variant": "#12661e",
+                        "primary": "#914700",
+                        "outline-variant": "#d7a372"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-orange-50/90 dark:bg-stone-950/90 font-['Plus_Jakarta_Sans'] font-bold tracking-tight docked full-width top-0 sticky z-50 no-border shadow-none bg-orange-100/50 dark:bg-stone-900/50 flex justify-between items-center px-6 py-4 w-full backdrop-blur-md">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-orange-700 dark:text-orange-500" data-icon="restaurant_menu">restaurant_menu</span>
+<h1 class="text-xl font-extrabold text-amber-950 dark:text-orange-50">The Modern Hearth</h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex gap-6 items-center mr-6">
+<a class="text-amber-900/60 dark:text-stone-400 hover:bg-orange-100 dark:hover:bg-stone-800 transition-colors px-3 py-1 rounded-lg" href="#">Today</a>
+<a class="text-amber-900/60 dark:text-stone-400 hover:bg-orange-100 dark:hover:bg-stone-800 transition-colors px-3 py-1 rounded-lg" href="#">Order</a>
+<a class="text-orange-800 dark:text-orange-400 font-bold px-3 py-1 rounded-lg" href="#">Management</a>
+</nav>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed/20">
+<img alt="Admin Profile" data-alt="close-up portrait of a professional chef in a white uniform with a friendly expression in a modern kitchen setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAF7eecrTU24LezbRxIUSxUDGCxvf9XmT1cpOUFp4p5vO8yZCAf-741dn_syHkY-qSSXfSXDk4xkxxO5DvqUEZp3UaIh60cU-35FCfU1T8VEsmraH2VyC8MCTyNTWvZx4bLQ2WPq-4lpr7vpWpwDwyzVFS0XCzt-0uG8x818n91sTbME1awQ_VZ91SUkCEheecO1xRcoMcfeJqT7R5IHldDc2tqtYgejlv7VKvEb3e2KfEYlElPdE9p3RtKkmmEprAp04SF0yUrog"/>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Section 1: Delivery Checklist -->
+<section class="lg:col-span-7">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">Delivery Checklist</h2>
+<p class="text-on-surface-variant text-sm mt-1">Real-time table service tracking</p>
+</div>
+<div class="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                    8 Active Orders
+                </div>
+</div>
+<div class="bg-surface-container-low rounded-3xl p-4 space-y-3">
+<!-- Checklist Item 1 -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between group transition-all">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 bg-surface-container-high rounded-xl flex items-center justify-center text-primary font-extrabold text-lg">
+                            T4
+                        </div>
+<div>
+<h3 class="font-bold text-on-primary-container">Marcus Thorne</h3>
+<p class="text-on-surface-variant text-sm">2x Wagyu Sliders, 1x Truffle Fries</p>
+</div>
+</div>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2.5 rounded-full font-bold text-sm hover:bg-secondary-container hover:text-on-secondary-container transition-all flex items-center gap-2 group-active:scale-95">
+<span class="material-symbols-outlined text-lg" data-icon="check_circle">check_circle</span>
+                        Check
+                    </button>
+</div>
+<!-- Checklist Item 2 (Checked State) -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between opacity-70">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 bg-secondary-container rounded-xl flex items-center justify-center text-secondary font-extrabold text-lg">
+                            T12
+                        </div>
+<div>
+<h3 class="font-bold text-on-primary-container line-through">Elena Rodriguez</h3>
+<p class="text-on-surface-variant text-sm">1x Garden Harvest Bowl</p>
+</div>
+</div>
+<div class="bg-secondary text-on-secondary px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="done_all" style="font-variation-settings: 'FILL' 1;">done_all</span>
+                        Delivered
+                    </div>
+</div>
+<!-- Checklist Item 3 -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 bg-surface-container-high rounded-xl flex items-center justify-center text-primary font-extrabold text-lg">
+                            T2
+                        </div>
+<div>
+<h3 class="font-bold text-on-primary-container">Sarah Jenkins</h3>
+<p class="text-on-surface-variant text-sm">3x Artisan Pizzas, 2x Pinot Noir</p>
+</div>
+</div>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2.5 rounded-full font-bold text-sm hover:bg-secondary-container hover:text-on-secondary-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="check_circle">check_circle</span>
+                        Check
+                    </button>
+</div>
+<!-- Checklist Item 4 -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl flex items-center justify-between">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 bg-surface-container-high rounded-xl flex items-center justify-center text-primary font-extrabold text-lg">
+                            T7
+                        </div>
+<div>
+<h3 class="font-bold text-on-primary-container">Liam O'Connor</h3>
+<p class="text-on-surface-variant text-sm">1x Seared Scallops, 1x Lemon Tart</p>
+</div>
+</div>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2.5 rounded-full font-bold text-sm hover:bg-secondary-container hover:text-on-secondary-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="check_circle">check_circle</span>
+                        Check
+                    </button>
+</div>
+</div>
+</section>
+<!-- Section 2: Stock CRUD -->
+<section class="lg:col-span-5">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">Inventory</h2>
+<p class="text-on-surface-variant text-sm mt-1">Manage kitchen stock levels</p>
+</div>
+<button class="bg-gradient-to-br from-primary to-primary-container text-white px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                    Add New
+                </button>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Stock Item 1 -->
+<div class="bg-surface-container-low rounded-3xl overflow-hidden">
+<div class="p-5 flex gap-4">
+<div class="w-24 h-24 rounded-2xl overflow-hidden shrink-0">
+<img alt="Wagyu Sliders" class="w-full h-full object-cover" data-alt="Close-up of three mini wagyu beef sliders with melted cheese and fresh greens on artisan buns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw0Q-SgjRBqiwHwsCCdmXTOpIClb0GZ3V-vODVuO72-XCPcPpyex2L4arHD-kya5PvJIPZH_jHjPZZRGffutFNFpOvS_js46WbSnPR0k6f3l2XxC_kKS-ztuZZQMG3J--hTX8AdC5piPjveHx6sjd5PMMZVEx6JzXSuGJO2G0ZFytk80WY3uwZWaSjqG6Q5yZa2wg7cAdJDb8LrnSO7po_HXCy1G1mGdvkX3jI3vcANHVU5LHUQd6kq_vIrRqwAOBA1E4jJxePRc4"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-on-surface">Wagyu Sliders</h4>
+<p class="text-xs text-on-surface-variant">Meat &amp; Poultry</p>
+</div>
+<button class="text-primary hover:bg-white/50 p-1 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<div class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider mb-1">Stock Level</div>
+<div class="flex gap-1">
+<div class="w-8 h-1.5 rounded-full bg-secondary"></div>
+<div class="w-8 h-1.5 rounded-full bg-secondary"></div>
+<div class="w-8 h-1.5 rounded-full bg-secondary"></div>
+<div class="w-8 h-1.5 rounded-full bg-surface-container-highest"></div>
+</div>
+</div>
+<span class="font-extrabold text-on-surface">42 <span class="text-xs font-normal text-on-surface-variant">/ 60</span></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stock Item 2 (Low Stock) -->
+<div class="bg-surface-container-low rounded-3xl overflow-hidden">
+<div class="p-5 flex gap-4">
+<div class="w-24 h-24 rounded-2xl overflow-hidden shrink-0">
+<img alt="Truffle Fries" class="w-full h-full object-cover" data-alt="A serving of golden crispy fries topped with parmesan cheese and black truffle shavings in a rustic bowl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVoMZErHnQXqRppa57nHuC-rUdyfLfY-YtS_BaQ2nk0rXDNmIqDSt5DyrpP9hSvlUeIsE7M1pzeFcwCrSFNqdwMLmRCwgzgY4pIVfKt2ZZQi00TWDe0VWLFSKsoEbKut5v3wX6RNV3qHgZQeVvWTfze1OptGGvqsn9g0qla_6yG1vB9LWiFj3M_ZQUMl00G76z0m4pX3hkW5tjQMS3lYl_eIw31YTKseBkgSEQXSWDO2NSaLxwMwIW7Rmw3Xkfx6l-tTgZO8mm44M"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-on-surface">Truffle Fries</h4>
+<p class="text-xs text-on-surface-variant">Sides</p>
+</div>
+<button class="text-primary hover:bg-white/50 p-1 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<div class="text-[10px] uppercase font-bold text-error tracking-wider mb-1">Critical Low</div>
+<div class="flex gap-1">
+<div class="w-8 h-1.5 rounded-full bg-error"></div>
+<div class="w-8 h-1.5 rounded-full bg-surface-container-highest"></div>
+<div class="w-8 h-1.5 rounded-full bg-surface-container-highest"></div>
+<div class="w-8 h-1.5 rounded-full bg-surface-container-highest"></div>
+</div>
+</div>
+<span class="font-extrabold text-error">8 <span class="text-xs font-normal text-on-surface-variant">/ 100</span></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stock Item 3 -->
+<div class="bg-surface-container-low rounded-3xl overflow-hidden">
+<div class="p-5 flex gap-4">
+<div class="w-24 h-24 rounded-2xl overflow-hidden shrink-0">
+<img alt="Pinot Noir" class="w-full h-full object-cover" data-alt="A bottle of elegant red wine next to a glass filled with deep crimson pinot noir on a dark wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFM9H9a8OrYAQxciibpPc6KMJUAm2wklydZkele9cTcrFd9NOO884I-NWDx2FNCEUk2_9NocqdjrVc7VzsPPTiETySDwa9KgVptyHIFB2f8nCUmgVbw3nPjDm5SVBXQtJPJ7JGkAQ5hlsqb4xOIiYh05EsNCT__fRmOTinClqAZDpveialTi_5p8T8jzVoCDzQki-pXumfQoioH2Ljk0Vo-qebA55VS7Z-pyDRdl_ttOoh0Crl0EHstxsZJa0PzyOUu4lie3GRirQ"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-on-surface">Pinot Noir (Res.)</h4>
+<p class="text-xs text-on-surface-variant">Cellar</p>
+</div>
+<button class="text-primary hover:bg-white/50 p-1 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<div class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider mb-1">Stock Level</div>
+<div class="flex gap-1">
+<div class="w-8 h-1.5 rounded-full bg-secondary"></div>
+<div class="w-8 h-1.5 rounded-full bg-secondary"></div>
+<div class="w-8 h-1.5 rounded-full bg-secondary"></div>
+<div class="w-8 h-1.5 rounded-full bg-secondary"></div>
+</div>
+</div>
+<span class="font-extrabold text-on-surface">15 <span class="text-xs font-normal text-on-surface-variant">/ 15</span></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 pb-safe bg-orange-50/80 dark:bg-stone-950/80 backdrop-blur-xl no-border space-y-2 shadow-[0_-4px_24px_rgba(71,39,1,0.06)] md:hidden">
+<div class="flex justify-around items-center w-full px-4 py-3">
+<a class="flex flex-col items-center justify-center text-amber-900/70 dark:text-stone-400 px-5 py-2 hover:bg-orange-100/50 dark:hover:bg-stone-800/50 rounded-full transition-colors font-['Plus_Jakarta_Sans'] text-[11px] font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="today">today</span>
+<span>Today</span>
+</a>
+<a class="flex flex-col items-center justify-center text-amber-900/70 dark:text-stone-400 px-5 py-2 hover:bg-orange-100/50 dark:hover:bg-stone-800/50 rounded-full transition-colors font-['Plus_Jakarta_Sans'] text-[11px] font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="lunch_dining">lunch_dining</span>
+<span>Order</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-gradient-to-br from-orange-700 to-orange-500 text-white rounded-full px-5 py-2 scale-90 transition-all font-['Plus_Jakarta_Sans'] text-[11px] font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings" style="font-variation-settings: 'FILL' 1;">admin_panel_settings</span>
+<span>Management</span>
+</a>
+</div>
+</nav>
+</body></html>

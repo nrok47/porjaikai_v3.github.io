@@ -3,293 +3,280 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ร้านพอใจขาย (All-in-One)</title>
+  <title>ร้านพอใจขาย - The Modern Hearth</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    html { scroll-behavior: smooth; }
+    .surface { background-color: #fff4ee; }
+    .card-surface { background-color: #ffffff; }
+    .blur-glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3); }
+    .badge { @apply inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold; }
+    .badge-live { @apply bg-green-100 text-green-700; }
+    .badge-limited { @apply bg-orange-100 text-orange-700; }
+    .badge-pending { @apply bg-blue-100 text-blue-700; }
+    .avatar-stack { display: flex; margin-left: -8px; }
+    .avatar-stack > div { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; margin-left: -8px; }
+  </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-24 font-sans">
+<body class="surface min-h-screen pb-32">
 
-  <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-orange-100">
-    <div class="flex justify-around p-3 max-w-md mx-auto">
-      <button onclick="showTab('today')" class="tab-btn active-tab font-bold text-slate-400 border-b-2 border-transparent px-2 pb-1 transition">ออเดอร์วันนี้</button>
-      <button onclick="showTab('order')" class="tab-btn font-bold text-slate-400 border-b-2 border-transparent px-2 pb-1 transition">สั่งของ</button>
-      <button onclick="showTab('admin')" class="tab-btn font-bold text-slate-400 border-b-2 border-transparent px-2 pb-1 transition">จัดการร้าน</button>
+  <!-- Header Navigation -->
+  <nav class="sticky top-0 z-50 blur-glass border-b border-white/20">
+    <div class="max-w-2xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-xl font-black text-orange-600">🍽️ ร้านพอใจขาย</h1>
+      <div class="flex space-x-2">
+        <button onclick="showTab('today')" class="today-btn px-4 py-2 font-bold text-sm rounded-lg bg-orange-600 text-white transition">📊 วันนี้</button>
+        <button onclick="showTab('order')" class="order-btn px-4 py-2 font-bold text-sm rounded-lg bg-slate-200 text-slate-600 transition">🛒 สั่ง</button>
+        <button onclick="showTab('admin')" class="admin-btn px-4 py-2 font-bold text-sm rounded-lg bg-slate-200 text-slate-600 transition">⚙️ จัดการ</button>
+      </div>
     </div>
   </nav>
 
-  <div class="max-w-md mx-auto p-4">
-    
-    <div id="tab-today" class="tab-content space-y-4">
-      <div class="flex justify-end mb-2">
-        <div class="flex items-center space-x-1.5 bg-white px-2 py-1 rounded-full shadow-sm">
-          <div id="statusDot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-          <span id="statusText" class="text-[10px] font-bold text-slate-500">กำลังเชื่อมต่อ...</span>
+  <div class="max-w-2xl mx-auto p-4 space-y-6">
+
+    <!-- ==================== TAB 1: TODAY'S ORDERS ==================== -->
+    <div id="tab-today" class="tab-content space-y-6">
+      
+      <!-- Featured Dish Hero -->
+      <div class="card-surface rounded-2xl overflow-hidden shadow-xl-soft">
+        <div class="relative aspect-video bg-gradient-to-br from-orange-200 to-orange-300 flex items-center justify-center">
+          <div id="featuredImg" class="w-full h-full object-cover"></div>
+          <div class="absolute top-4 left-4 badge badge-live">⭐ มาแรงสุด</div>
+          <div class="absolute bottom-4 left-4 right-4 bg-black/40 text-white p-3 rounded-xl backdrop-blur">
+            <p class="font-black text-lg" id="featuredName">กำลังโหลด...</p>
+            <p class="text-xs opacity-80" id="featuredDesc">ชานชาลาดโต้ว ของเด็กศอ</p>
+          </div>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-        <h2 class="text-orange-600 font-black text-lg mb-4 text-center">📋 สรุปรายการจองวันนี้</h2>
-        <div id="todayLineSummary" class="space-y-6 text-sm leading-relaxed">
-          <p class="text-center text-slate-400 animate-pulse">กำลังโหลดข้อมูล...</p>
+      <!-- Live Count & Engagement -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="card-surface p-5 rounded-2xl shadow-xl-soft text-center">
+          <p class="text-3xl font-black text-orange-600" id="liveOrderCount">0</p>
+          <p class="text-xs font-bold text-slate-500 uppercase mt-1">ออเดอร์ในชั่วโมงนี้</p>
+        </div>
+        <div class="card-surface p-5 rounded-2xl shadow-xl-soft text-center">
+          <p class="text-3xl font-black text-green-600" id="totalBuyers">0</p>
+          <p class="text-xs font-bold text-slate-500 uppercase mt-1">คนที่สั่งแล้ว</p>
         </div>
       </div>
+
+      <!-- Trending Products -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+        <h2 class="font-black text-lg text-slate-800 mb-4">🔥 ที่ชาวศอ.10 ชอบสุด</h2>
+        <div id="trendingList" class="space-y-3"></div>
+      </div>
+
+      <!-- Recent Orders Activity -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+        <h2 class="font-black text-lg text-slate-800 mb-4">📱 เพื่อนๆ กำลังสั่ง</h2>
+        <div id="recentOrdersList" class="space-y-3"></div>
+      </div>
+
     </div>
 
+    <!-- ==================== TAB 2: ORDER FOOD ==================== -->
     <div id="tab-order" class="tab-content hidden space-y-6">
-      
-      <div id="myStatusSection" class="hidden bg-blue-50 p-4 rounded-2xl border border-blue-100 shadow-sm">
-        <h3 class="font-bold text-blue-700 text-xs uppercase mb-2 flex items-center justify-between">
-          <span>ออเดอร์ของคุณวันนี้:</span>
-          <span id="profileName" class="text-slate-500 bg-white px-2 py-1 rounded-full text-[10px]">👤 โหลดข้อมูล...</span>
-        </h3>
-        <div id="myOrdersList" class="space-y-1"></div>
+
+      <!-- Pending Payment Banner -->
+      <div id="pendingBanner" class="hidden bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-start space-x-3">
+        <span class="text-xl">📱</span>
+        <div class="flex-grow">
+          <p class="font-black text-blue-700 text-sm">ยังคงค้างการชำระเงิน</p>
+          <p class="text-xs text-blue-600 mt-1" id="pendingText">ออเดอร์ #8842 - 3 รายการ - 450 ฿</p>
+          <button onclick="showPendingOrder()" class="mt-2 text-xs font-bold text-blue-700 hover:underline">ไปจ่ายเงิน →</button>
+        </div>
       </div>
 
-      <div id="productList" class="space-y-3"></div>
+      <!-- My Orders Today -->
+      <div id="myStatusSection" class="hidden bg-slate-100 p-4 rounded-xl">
+        <p class="font-bold text-xs text-slate-600 uppercase mb-2">ออเดอร์ของคุณวันนี้ 👤</p>
+        <div id="myOrdersList" class="space-y-2"></div>
+      </div>
 
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-5">
+      <!-- Menu Grid (Bento Layout) -->
+      <div>
+        <h2 class="font-black text-lg text-slate-800 mb-4">📦 เลือกเมนู</h2>
+        <div id="productList" class="grid grid-cols-1 gap-4"></div>
+      </div>
+
+      <!-- Delivery & Payment Selection -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft space-y-6">
+        
+        <!-- Delivery Method Toggle -->
         <div>
-          <label class="text-xs font-bold text-slate-400 uppercase">🚚 วิธีรับของ:</label>
-          <div class="grid grid-cols-2 gap-2 mt-2">
-             <button onclick="setDel('ส่งที่โต๊ะ', this)" class="del-btn border-orange-500 bg-orange-50 text-orange-600 p-3 rounded-xl text-sm font-bold border-2 transition">ส่งที่โต๊ะ</button>
-             <button onclick="setDel('มารับเอง', this)" class="del-btn border-transparent bg-slate-100 text-slate-600 p-3 rounded-xl text-sm font-bold border-2 transition">มารับเอง</button>
+          <p class="font-bold text-xs text-slate-500 uppercase mb-3">🚚 รับที่ไหน?</p>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="setDelivery('ส่งที่โต๊ะ', this)" class="delivery-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
+              📍 ส่งที่โต๊ะ
+            </button>
+            <button onclick="setDelivery('มารับเอง', this)" class="delivery-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
+              🚶 มารับเอง
+            </button>
           </div>
         </div>
+
+        <!-- Payment Method Toggle -->
         <div>
-          <label class="text-xs font-bold text-slate-400 uppercase">💰 วิธีจ่ายเงิน:</label>
-          <div class="grid grid-cols-2 gap-2 mt-2">
-             <button onclick="setPay('โอนเงิน', this)" class="pay-btn border-orange-500 bg-orange-50 text-orange-600 p-3 rounded-xl text-sm font-bold border-2 transition">โอนเงิน</button>
-             <button onclick="setPay('เงินสด', this)" class="pay-btn border-transparent bg-slate-100 text-slate-600 p-3 rounded-xl text-sm font-bold border-2 transition">เงินสด</button>
+          <p class="font-bold text-xs text-slate-500 uppercase mb-3">💰 จ่ายยังไง?</p>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="setPayment('โอนเงิน', this)" class="payment-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
+              📱 โอนเงิน
+            </button>
+            <button onclick="setPayment('เงินสด', this)" class="payment-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
+              💵 เงินสด
+            </button>
           </div>
         </div>
 
-        <div id="slipArea" class="pt-4 border-t border-slate-50">
-          <label class="cursor-pointer block border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition">
-            <span id="uploadLabel" class="text-xs font-bold text-slate-500">📸 แนบสลิปโอนเงิน</span>
-            <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="processImage(this)">
+        <!-- Conditional Receipt Upload -->
+        <div id="slipSection" class="hidden pt-4 border-t border-slate-100">
+          <p class="font-bold text-xs text-slate-500 uppercase mb-3">📸 แนบสลิป</p>
+          <label class="block border-2 border-dashed border-slate-300 rounded-xl p-6 text-center bg-slate-50 hover:bg-slate-100 cursor-pointer transition">
+            <span id="uploadLabel" class="font-bold text-slate-500 block">📸 แนบสลิปโอนเงิน</span>
+            <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="compressImage(this)">
           </label>
-          <img id="preview" class="hidden mt-3 rounded-xl max-h-40 mx-auto shadow-md border-2 border-white">
+          <div id="previewContainer" class="hidden mt-4">
+            <img id="preview" class="rounded-xl max-h-64 mx-auto shadow-lg">
+          </div>
         </div>
+
       </div>
 
-      <div class="bg-orange-500 text-white p-4 rounded-2xl shadow-lg flex justify-between items-center">
+      <!-- Total & CTA -->
+      <div class="gradient-primary text-white p-6 rounded-2xl shadow-xl-soft flex justify-between items-center sticky bottom-24">
         <div>
-          <p class="text-[10px] font-bold uppercase opacity-80">ยอดรวมทั้งหมด</p>
+          <p class="text-xs font-bold opacity-80 uppercase">รวมทั้งสิ้น</p>
           <p class="text-3xl font-black"><span id="totalPrice">0</span> ฿</p>
         </div>
-        <button onclick="submitOrder()" id="btnSubmit" disabled class="bg-white text-orange-600 font-black px-6 py-3 rounded-xl shadow-sm active:scale-95 disabled:opacity-50 transition">ยืนยัน 🚀</button>
-      </div>
-    </div>
-
-    <div id="tab-admin" class="tab-content hidden space-y-4">
-      
-      <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-pink-500">
-        <h3 class="font-bold text-slate-500 text-sm mb-3">📈 ภาพรวมยอดขายรายเดือน</h3>
-        <canvas id="monthlyChart" height="200"></canvas>
-      </div>
-
-      <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-green-500">
-        <h2 class="font-bold text-slate-500 text-sm mb-3">💰 สรุปการเงินวันนี้</h2>
-        <div class="text-center mb-4">
-          <p class="text-xs text-slate-400">ยอดขายรวม</p>
-          <p class="text-4xl font-black text-green-600"><span id="finTotal">0</span> ฿</p>
-        </div>
-      </div>
-
-      <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-purple-500">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="font-bold text-slate-500 text-sm">🚚 รายการส่งของวันนี้</h2>
-          <button onclick="loadAdminData()" class="text-xs bg-slate-100 px-2 py-1 rounded-md font-bold">🔄 รีเฟรช</button>
-        </div>
-        <div id="deliveryList" class="space-y-3"></div>
-      </div>
-
-      <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-indigo-500">
-        <h2 class="font-bold text-slate-500 text-sm mb-3">🛠️ จัดการสต็อก (วันนี้)</h2>
-        <div id="productCrudList" class="space-y-2"></div>
+        <button onclick="submitOrder()" id="btnSubmit" disabled class="bg-white text-orange-600 font-black px-6 py-3 rounded-xl shadow-lg transition hover:scale-105 active:scale-95 disabled:opacity-50">
+          <span id="submitText">สั่งแล้ว 🚀</span>
+        </button>
       </div>
 
     </div>
+
+    <!-- ==================== TAB 3: ADMIN DASHBOARD ==================== -->
+    <div id="tab-admin" class="tab-content hidden space-y-6">
+
+      <!-- Admin Auth Check -->
+      <div id="adminAuthSection" class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+        <p class="text-slate-600 font-bold mb-4">🔐 กรุณายืนยันตัวตนแอดมิน</p>
+        <input type="password" id="adminPassword" placeholder="รหัสผ่าน" class="w-full border border-slate-300 p-3 rounded-lg mb-3">
+        <button onclick="verifyAdmin()" class="w-full bg-primary text-white font-bold py-3 rounded-lg">เข้าระบบ</button>
+      </div>
+
+      <div id="adminContent" class="hidden space-y-6">
+
+        <!-- Monthly Chart -->
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+          <h2 class="font-black text-lg text-slate-800 mb-4">📈 ยอดขายรายเดือน</h2>
+          <canvas id="monthlyChart" height="200"></canvas>
+        </div>
+
+        <!-- Financial Summary Grid -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+            <p class="text-2xl font-black text-orange-600" id="finTotal">0</p>
+            <p class="text-xs font-bold text-slate-500 uppercase mt-2">ยอดขายวันนี้</p>
+          </div>
+          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+            <p class="text-2xl font-black text-blue-600" id="finTransfer">0</p>
+            <p class="text-xs font-bold text-slate-500 uppercase mt-2">โอนเงิน</p>
+          </div>
+          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+            <p class="text-2xl font-black text-green-600" id="finCash">0</p>
+            <p class="text-xs font-bold text-slate-500 uppercase mt-2">เงินสด</p>
+          </div>
+          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+            <p class="text-2xl font-black text-red-600" id="finUnpaid">0</p>
+            <p class="text-xs font-bold text-slate-500 uppercase mt-2">ค้างจ่าย</p>
+          </div>
+        </div>
+
+        <!-- Delivery Checklist -->
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="font-black text-lg text-slate-800">🚚 ส่งของวันนี้</h2>
+            <button onclick="loadAdminData()" class="text-xs bg-slate-100 px-3 py-1 rounded-lg font-bold">🔄 รีเฟรช</button>
+          </div>
+          <div id="deliveryList" class="space-y-3"></div>
+        </div>
+
+        <!-- Stock Management -->
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
+          <h2 class="font-black text-lg text-slate-800 mb-4">📊 จัดสต็อก</h2>
+          <div id="productCrudList" class="space-y-3"></div>
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
   <script>
-    // ⚠️ เปลี่ยน URL ตรงนี้เป็นของใหม่ล่าสุดครับ
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxobiQN1X8Nrjj7_m_zLDKjCHil8RuQXHx6j9dDlNUH6iSQi2whD2GQmUda8UUX-iPQ-g/exec"; 
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxobiQN1X8Nrjj7_m_zLDKjCHil8RuQXHx6j9dDlNUH6iSQi2whD2GQmUda8UUX-iPQ-g/exec";
     
-    let user = { id: "ADMIN_TEST", name: "ลูกค้าทั่วไป" }; // ค่า Default ตอนรันบนคอม
-    let base64Image = "";
+    let user = { id: "GUEST", name: "ชาวศอ.10" };
     let menuData = [];
     let cart = {};
-    let allProducts = [];
-    
-    // ตั้งค่า Default ของปุ่มรับของ/จ่ายเงิน
     let deliveryMethod = 'ส่งที่โต๊ะ';
     let paymentMethod = 'โอนเงิน';
+    let slipBase64 = '';
+    let adminAuthenticated = false;
 
-    // ==========================================
-    // 1. ระบบจัดการ Tab & UI
-    // ==========================================
+    // ============ TAB MANAGEMENT ============
     function showTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
       document.getElementById('tab-' + tabId).classList.remove('hidden');
       
-      document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('active-tab', 'text-orange-500', 'border-orange-500');
-        b.classList.add('text-slate-400', 'border-transparent');
-      });
-      event.target.classList.remove('text-slate-400', 'border-transparent');
-      event.target.classList.add('active-tab', 'text-orange-500', 'border-orange-500');
-      
+      // Update button states
+      document.querySelectorAll('nav button').forEach(b => b.classList.add('bg-slate-200', 'text-slate-600'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('bg-orange-600', 'text-white'));
+      if(tabId === 'today') document.querySelector('.today-btn').classList.add('bg-orange-600', 'text-white');
+      if(tabId === 'order') document.querySelector('.order-btn').classList.add('bg-orange-600', 'text-white');
+      if(tabId === 'admin') document.querySelector('.admin-btn').classList.add('bg-orange-600', 'text-white');
+
       if(tabId === 'admin') loadAdminData();
     }
 
-    function setApiStatus(isOnline) {
-      const dot = document.getElementById('statusDot');
-      const text = document.getElementById('statusText');
-      if (isOnline) {
-        dot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]";
-        text.innerText = "เชื่อมต่อแล้ว"; text.className = "text-[10px] font-bold text-green-600";
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]";
-        text.innerText = "ระบบขัดข้อง"; text.className = "text-[10px] font-bold text-red-600";
-      }
-    }
-
-    // ==========================================
-    // 2. ฟังก์ชันแก้ไขปุ่มที่พัง (setDel, setPay)
-    // ==========================================
-    function setDel(method, btn) {
+    // ============ DELIVERY & PAYMENT TOGGLES ============
+    function setDelivery(method, btn) {
       deliveryMethod = method;
-      document.querySelectorAll('.del-btn').forEach(el => {
-        el.classList.remove('border-orange-500', 'bg-orange-50', 'text-orange-600');
-        el.classList.add('border-transparent', 'bg-slate-100', 'text-slate-600');
-      });
-      btn.classList.remove('border-transparent', 'bg-slate-100', 'text-slate-600');
-      btn.classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
+      document.querySelectorAll('.delivery-btn').forEach(b => b.classList.remove('border-orange-500', 'bg-orange-100', 'text-orange-700'));
+      document.querySelectorAll('.delivery-btn').forEach(b => b.classList.add('bg-slate-100', 'text-slate-600'));
+      btn.classList.remove('bg-slate-100', 'text-slate-600');
+      btn.classList.add('border-orange-500', 'bg-orange-100', 'text-orange-700');
     }
 
-    function setPay(method, btn) {
+    function setPayment(method, btn) {
       paymentMethod = method;
-      document.querySelectorAll('.pay-btn').forEach(el => {
-        el.classList.remove('border-orange-500', 'bg-orange-50', 'text-orange-600');
-        el.classList.add('border-transparent', 'bg-slate-100', 'text-slate-600');
-      });
-      btn.classList.remove('border-transparent', 'bg-slate-100', 'text-slate-600');
-      btn.classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
+      document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('border-blue-500', 'bg-blue-100', 'text-blue-700'));
+      document.querySelectorAll('.payment-btn').forEach(b => b.classList.add('bg-slate-100', 'text-slate-600'));
+      btn.classList.remove('bg-slate-100', 'text-slate-600');
+      btn.classList.add('border-blue-500', 'bg-blue-100', 'text-blue-700');
 
-      const slipArea = document.getElementById('slipArea');
-      if (method === 'โอนเงิน') {
-        slipArea.classList.remove('hidden');
+      // Show/hide slip section conditionally
+      const slipSection = document.getElementById('slipSection');
+      if(method === 'โอนเงิน') {
+        slipSection.classList.remove('hidden');
       } else {
-        slipArea.classList.add('hidden');
-        base64Image = ""; // ล้างรูปสลิปทิ้งถ้าเลือกเงินสด
-        document.getElementById('preview').classList.add('hidden');
-        document.getElementById('uploadLabel').innerText = "📸 แนบสลิปโอนเงิน";
+        slipSection.classList.add('hidden');
+        slipBase64 = '';
+        document.getElementById('previewContainer').classList.add('hidden');
       }
     }
 
-    // ==========================================
-    // 3. เริ่มต้นระบบ & โหลดข้อมูลลูกค้า
-    // ==========================================
-    async function init() {
-      try {
-        await liff.init({ liffId: "2009833407-3mbGMf7p" });
-        if (liff.isLoggedIn()) {
-          const profile = await liff.getProfile();
-          user.id = profile.userId;
-          user.name = profile.displayName;
-        }
-        document.getElementById("profileName").innerText = "👤 ผู้สั่ง: " + user.name;
-      } catch (err) { console.log("Run on Web Browser"); }
-      loadDashboard();
-    }
-    init();
-
-    async function loadDashboard() {
-      try {
-        const response = await fetch(GAS_URL + "?action=getDashboard&lineId=" + user.id);
-        const result = await response.json();
-        
-        menuData = result.data.products;
-        renderMenu(); // สร้างหน้าเมนูสั่งของ
-
-        // สร้างสรุปแบบโพสต์ไลน์ (Tab 1)
-        const summaryDiv = document.getElementById('todayLineSummary');
-        let lineText = "";
-        if (menuData.length === 0) lineText = "<p class='text-center text-slate-400'>ยังไม่มีการเปิดรับออเดอร์จ้า</p>";
-        menuData.forEach(p => {
-          if(p.buyers.length > 0) {
-            lineText += `<div class="border-b border-slate-100 pb-3"><p class="font-black text-slate-800">${p.name} (${p.price}.-)</p>`;
-            p.buyers.forEach((b, i) => { lineText += `<p class="text-slate-600 ml-2">${i+1}. ${b}</p>`; });
-            lineText += `</div>`;
-          }
-        });
-        summaryDiv.innerHTML = lineText || "<p class='text-center text-slate-400'>ยังไม่มีคนจองเลย ประเดิมเป็นคนแรกสิ!</p>";
-
-        // สร้างสถานะของฉัน
-        if(result.data.myOrders.length > 0) {
-          document.getElementById('myStatusSection').classList.remove('hidden');
-          document.getElementById('myOrdersList').innerHTML = result.data.myOrders.map(o => 
-            `<div class="flex justify-between text-xs py-1 border-b border-blue-100 last:border-0"><span class="font-medium">${o.name} x${o.qty}</span><span class="font-black">${o.payStatus} | ${o.delStatus}</span></div>`
-          ).join('');
-        }
-        setApiStatus(true);
-      } catch (error) { setApiStatus(false); }
-    }
-
-    function renderMenu() {
-      const container = document.getElementById("productList");
-      container.innerHTML = "";
-      const fallbackImg = "https://placehold.co/150x150/ffedd5/f97316?text=Menu";
-
-      menuData.forEach((item, index) => {
-        cart[item.name] = { qty: 0, price: item.price };
-        const isSoldOut = item.remaining <= 0;
-        
-        container.innerHTML += `
-          <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3 ${isSoldOut ? 'opacity-60 grayscale' : ''}">
-            <div class="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
-              <img src="${item.imageUrl || fallbackImg}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover">
-            </div>
-            <div class="flex-grow">
-              <h3 class="font-black text-slate-800 text-sm">${item.name}</h3>
-              <p class="text-orange-500 font-bold text-xs">${item.price} ฿</p>
-              <p class="text-[10px] font-bold text-slate-400 uppercase">เหลือ: ${item.remaining}</p>
-            </div>
-            <div class="flex items-center space-x-1 bg-slate-50 p-1 rounded-lg">
-              <button onclick="updateQty('${item.name}', -1, ${item.remaining})" class="w-6 h-6 bg-white rounded-md shadow-sm font-bold text-slate-600">-</button>
-              <span id="qty-${index}" class="w-5 text-center font-black text-slate-800 text-sm">0</span>
-              <button onclick="updateQty('${item.name}', 1, ${item.remaining})" class="w-6 h-6 bg-orange-400 rounded-md shadow-sm font-bold text-white ${isSoldOut ? 'hidden' : ''}">+</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function updateQty(name, change, max) {
-      let newQty = cart[name].qty + change;
-      if (newQty < 0) newQty = 0;
-      if (newQty > max) { alert("เกินโควต้าที่เหลือจ้า"); newQty = max; }
-      cart[name].qty = newQty;
-      const idx = menuData.findIndex(p => p.name === name);
-      document.getElementById(`qty-${idx}`).innerText = newQty;
-      updateTotal();
-    }
-
-    function updateTotal() {
-      let price = 0, items = 0;
-      for (const k in cart) { price += (cart[k].qty * cart[k].price); items += cart[k].qty; }
-      document.getElementById("totalPrice").innerText = price;
-      document.getElementById("btnSubmit").disabled = items === 0;
-    }
-
-    // ==========================================
-    // 4. จัดการรูปภาพ และส่งข้อมูล
-    // ==========================================
-    function processImage(input) {
-      if (!input.files || !input.files[0]) return;
-      document.getElementById('uploadLabel').innerText = "⏳ กำลังย่อขนาดรูป...";
+    // ============ IMAGE COMPRESSION ============
+    function compressImage(input) {
+      if(!input.files[0]) return;
+      document.getElementById('uploadLabel').textContent = '⏳ บีบอัดรูป...';
       const reader = new FileReader();
       reader.readAsDataURL(input.files[0]);
       reader.onload = e => {
@@ -298,113 +285,278 @@
         img.onload = () => {
           const canvas = document.createElement('canvas');
           let w = img.width, h = img.height;
-          if (w > h && w > 800) { h *= 800/w; w = 800; } else if (h > 800) { w *= 800/h; h = 800; }
+          if(w > 800 || h > 800) {
+            const ratio = Math.min(800/w, 800/h);
+            w *= ratio; h *= ratio;
+          }
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          base64Image = canvas.toDataURL('image/jpeg', 0.7);
-          document.getElementById('preview').src = base64Image;
-          document.getElementById('preview').classList.remove('hidden');
-          document.getElementById('uploadLabel').innerText = "✅ แนบรูปเรียบร้อย";
-        }
-      }
-    }
-
-    async function submitOrder() {
-      const btn = document.getElementById("btnSubmit");
-      let items = [];
-      for (const k in cart) if (cart[k].qty > 0) items.push({ name: k, qty: cart[k].qty, price: cart[k].price });
-      
-      btn.disabled = true; btn.innerText = "กำลังส่ง... ⏳";
-
-      const payload = {
-        action: "createOrder",
-        data: {
-          customerName: user.name, lineId: user.id, cart: items,
-          deliveryMethod: deliveryMethod, paymentMethod: paymentMethod, slipBase64: base64Image
-        }
+          slipBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          document.getElementById('preview').src = slipBase64;
+          document.getElementById('previewContainer').classList.remove('hidden');
+          document.getElementById('uploadLabel').textContent = '✅ แนบเรียบร้อย';
+        };
       };
-
-      try {
-        const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
-        if ((await res.json()).status === "success") { 
-          alert("จองสำเร็จ! รอรับความอร่อยได้เลย 🎉"); 
-          loadDashboard(); // โหลดข้อมูลใหม่
-          showTab('today'); // เด้งกลับหน้าสรุป
-        }
-      } catch (err) { alert("เกิดข้อผิดพลาด 🔴"); }
-      btn.disabled = false; btn.innerText = "ยืนยัน 🚀";
     }
 
-    // ==========================================
-    // 5. โหลดข้อมูลสำหรับ Admin & Chart.js
-    // ==========================================
-    async function loadAdminData() {
-      try {
-        const res = await fetch(GAS_URL + "?action=getAdminData");
-        const result = await res.json();
-        
-        // การเงิน
-        document.getElementById("finTotal").innerText = result.data.finance.total;
-        
-        // สต็อก (CRUD)
-        allProducts = result.data.products;
-        document.getElementById("productCrudList").innerHTML = allProducts.map(p => `
-          <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border text-sm mb-2">
-            <div><p class="font-black text-slate-700">${p.name}</p><p class="text-xs">โควต้า: <span class="font-bold text-orange-600">${p.stock}</span></p></div>
-            <button onclick="quickUpdateStock('${p.id}', '${p.name}', ${p.stock})" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md text-xs font-bold">แก้ไข</button>
-          </div>
-        `).join('');
-
-        // ส่งของ
-        document.getElementById("deliveryList").innerHTML = result.data.orders.map(order => {
-          const isDelivered = order.deliveryStatus === 'ส่งแล้ว';
-          return `
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-sm">
-            <div class="flex justify-between"><span class="font-black">${order.customer}</span><span class="text-[10px] bg-purple-100 text-purple-600 px-1 rounded">${order.deliveryMethod}</span></div>
-            <div class="text-slate-500 text-xs mb-2">${order.items.join(', ')}</div>
-            <button onclick="updateStatus('${order.orderId}', 'delivery', '${isDelivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="w-full py-1.5 rounded-md font-bold text-xs transition ${isDelivered ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-600'}">${isDelivered ? '✅ ส่งแล้ว' : '📦 เช็กส่งของ'}</button>
-          </div>`
-        }).join('');
-
-        // วาดกราฟ Chart.js
-        renderChart(result.data.monthlyStats);
-      } catch(e) { console.log(e); }
+    // ============ CART MANAGEMENT ============
+    function updateCart(name, change) {
+      const item = menuData.find(p => p.name === name);
+      if(!item) return;
+      let newQty = (cart[name] || 0) + change;
+      if(newQty < 0) newQty = 0;
+      if(newQty > item.remaining) { alert('เกินโควต้าสูงสุด'); return; }
+      cart[name] = newQty;
+      renderMenu();
+      updateTotal();
     }
 
-    function renderChart(stats) {
-      const ctx = document.getElementById('monthlyChart').getContext('2d');
-      if(window.myChart) window.myChart.destroy();
+    function updateTotal() {
+      let total = 0;
+      for(const name in cart) {
+        const item = menuData.find(p => p.name === name);
+        total += (cart[name] * item.price);
+      }
+      document.getElementById('totalPrice').innerText = total;
+      document.getElementById('btnSubmit').disabled = total === 0;
+    }
+
+    // ============ MENU RENDERING ============
+    function renderMenu() {
+      const container = document.getElementById('productList');
+      container.innerHTML = '';
+      const fallbackImg = 'https://via.placeholder.com/200x200/FFE5CC/F97316?text=Menu';
       
-      const labels = Object.keys(stats).sort();
-      const data = labels.map(k => stats[k]);
-
-      window.myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{ label: 'รายได้ (บาท)', data: data, backgroundColor: '#f97316', borderRadius: 6 }]
-        },
-        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      menuData.forEach(item => {
+        const qty = cart[item.name] || 0;
+        const sold = item.remaining <= 0;
+        container.innerHTML += `
+          <div class="card-surface p-4 rounded-xl shadow-sm overflow-hidden ${sold ? 'opacity-50 grayscale' : ''}">
+            <div class="flex space-x-4">
+              <img src="${item.imageUrl || fallbackImg}" onerror="this.src='${fallbackImg}'" class="w-24 h-24 object-cover rounded-lg">
+              <div class="flex-grow">
+                <h3 class="font-black text-slate-800">${item.name}</h3>
+                <p class="text-orange-600 font-bold text-lg">${item.price} ฿</p>
+                <p class="text-xs text-slate-500 font-bold">เหลือ: ${item.remaining}</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="updateCart('${item.name}', -1)" class="w-7 h-7 rounded-md font-bold text-sm bg-slate-100 hover:bg-slate-200">−</button>
+                <span class="w-6 text-center font-black">${qty}</span>
+                <button onclick="updateCart('${item.name}', 1)" class="w-7 h-7 rounded-md font-bold text-sm bg-orange-600 text-white hover:bg-orange-700 ${sold ? 'hidden' : ''}">+</button>
+              </div>
+            </div>
+          </div>
+        `;
       });
     }
 
-    async function updateStatus(orderId, type, value) {
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', data: { orderId, type, value }}) });
-      loadAdminData(); 
+    // ============ ORDER SUBMISSION ============
+    async function submitOrder() {
+      const btn = document.getElementById('btnSubmit');
+      let items = [];
+      for(const name in cart) {
+        if(cart[name] > 0) {
+          const item = menuData.find(p => p.name === name);
+          items.push({ name, qty: cart[name], price: item.price });
+        }
+      }
+
+      btn.disabled = true;
+      btn.innerText = '⏳ กำลังส่ง...';
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'createOrder',
+            password: '12399',
+            data: {
+              customerName: user.name,
+              lineId: user.id,
+              cart: items,
+              deliveryMethod,
+              paymentMethod,
+              slipBase64
+            }
+          })
+        });
+        const result = await res.json();
+        if(result.status === 'success') {
+          alert('✅ สั่งสำเร็จ!');
+          cart = {};
+          slipBase64 = '';
+          loadDashboard();
+          showTab('today');
+        } else {
+          alert('❌ ' + result.message);
+        }
+      } catch(e) {
+        alert('❌ เกิดข้อผิดพลาด: ' + e);
+      }
+      btn.disabled = false;
+      btn.innerText = 'สั่งแล้ว 🚀';
     }
 
-    async function quickUpdateStock(id, name, currentStock) {
-      const newStock = prompt(`แก้จำนวนโควต้าของ ${name}:`, currentStock);
-      if(newStock !== null) {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', data: { mode: 'update', id: id, oldName: name, name: name, price: 0, stock: parseInt(newStock) }}) });
+    // ============ ADMIN PANEL ============
+    function verifyAdmin() {
+      const pwd = document.getElementById('adminPassword').value;
+      if(pwd === '12399') {
+        adminAuthenticated = true;
+        document.getElementById('adminAuthSection').classList.add('hidden');
+        document.getElementById('adminContent').classList.remove('hidden');
         loadAdminData();
+      } else {
+        alert('❌ รหัสผ่านไม่ถูกต้อง');
       }
     }
+
+    async function loadAdminData() {
+      if(!adminAuthenticated) return;
+      try {
+        const res = await fetch(GAS_URL + '?action=getAdminData&password=12399');
+        const result = await res.json();
+        const data = result.data;
+
+        // Financial
+        document.getElementById('finTotal').innerText = data.finance.total;
+        document.getElementById('finTransfer').innerText = data.finance.transfer;
+        document.getElementById('finCash').innerText = data.finance.cash;
+        document.getElementById('finUnpaid').innerText = data.finance.unpaid || 0;
+
+        // Delivery List
+        document.getElementById('deliveryList').innerHTML = data.orders.map(order => {
+          const delivered = order.deliveryStatus === 'ส่งแล้ว';
+          return `
+            <div class="bg-slate-50 p-4 rounded-lg">
+              <div class="flex justify-between items-center mb-2">
+                <p class="font-black text-slate-800">${order.customer}</p>
+                <span class="badge badge-info">${order.deliveryMethod}</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-3">${order.items.join(', ')}</p>
+              <button onclick="updateStatus('${order.orderId}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="w-full py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-700'}">
+                ${delivered ? '✅ ส่งแล้ว' : '📦 เช็กส่งของ'}
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        // Products
+        allProducts = data.products || [];
+        document.getElementById('productCrudList').innerHTML = allProducts.map(p => `
+          <div class="bg-slate-50 p-3 rounded-lg flex justify-between items-center">
+            <div>
+              <p class="font-bold text-slate-800">${p.name}</p>
+              <p class="text-xs text-slate-500">โควต้า: <span class="font-bold text-orange-600">${p.stock}</span></p>
+            </div>
+            <button onclick="updateStock('${p.name}', ${p.stock})" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700">แก้ไข</button>
+          </div>
+        `).join('');
+
+        // Monthly Chart
+        renderChart(data.monthlyStats);
+      } catch(e) {
+        alert('❌ โหลดข้อมูลไม่สำเร็จ: ' + e);
+      }
+    }
+
+    async function updateStatus(orderId, type, value) {
+      try {
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'updateStatus',
+            password: '12399',
+            data: { orderId, type, value }
+          })
+        });
+        loadAdminData();
+      } catch(e) { alert('❌ ' + e); }
+    }
+
+    async function updateStock(name, current) {
+      const newStock = prompt(`แก้จำนวนโควต้า "${name}":`, current);
+      if(newStock !== null) {
+        try {
+          await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'manageProduct',
+              password: '12399',
+              data: { mode: 'update', oldName: name, name, price: 0, stock: parseInt(newStock) }
+            })
+          });
+          loadAdminData();
+        } catch(e) { alert('❌ ' + e); }
+      }
+    }
+
+    function renderChart(stats) {
+      const ctx = document.getElementById('monthlyChart');
+      if(!ctx) return;
+      if(window.myChart) window.myChart.destroy();
+      const labels = Object.keys(stats).sort().slice(-6);
+      const data = labels.map(k => stats[k]);
+      window.myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{ label: 'บาท', data, backgroundColor: '#f97f06', borderRadius: 8, borderSkipped: false }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // ============ INITIALIZE ============
+    async function loadDashboard() {
+      try {
+        const res = await fetch(GAS_URL + '?action=getDashboard&lineId=' + user.id);
+        const result = await res.json();
+        menuData = result.data.products;
+        cart = {};
+        menuData.forEach(p => cart[p.name] = 0);
+
+        // Trending
+        const trending = menuData.sort((a,b) => b.buyers.length - a.buyers.length).slice(0, 3);
+        document.getElementById('trendingList').innerHTML = trending.map(p => `
+          <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+            <p class="font-bold text-slate-800">${p.name}</p>
+            <p class="badge badge-live">${p.buyers.length} ชาว</p>
+          </div>
+        `).join('');
+
+        // Live Orders
+        const recentBuyers = [];
+        menuData.forEach(p => {
+          p.buyers.forEach((b, i) => {
+            if(i < 2) recentBuyers.push({ buyer: b, product: p.name });
+          });
+        });
+        document.getElementById('recentOrdersList').innerHTML = recentBuyers.map(o => `
+          <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-bold">${o.buyer.charAt(0)}</div>
+            <p class="text-sm"><span class="font-bold">${o.buyer}</span> <span class="text-slate-500">สั่ง</span> <span class="font-bold text-orange-600">${o.product}</span></p>
+          </div>
+        `).join('');
+
+        // Counters
+        document.getElementById('liveOrderCount').innerText = menuData.reduce((a,p) => a + p.buyers.length, 0);
+        document.getElementById('totalBuyers').innerText = new Set(menuData.flatMap(p => p.buyers)).size;
+
+        renderMenu();
+        updateTotal();
+      } catch(e) { console.error(e); }
+    }
+
+    // Set default selection
+    setDelivery('ส่งที่โต๊ะ', document.querySelector('.delivery-btn:first-child'));
+    setPayment('โอนเงิน', document.querySelector('.payment-btn:first-child'));
+
+    loadDashboard();
   </script>
 
-  <style>
-    .active-tab { color: #f97316 !important; border-color: #f97316 !important; }
-    .tab-btn { color: #94a3b8; border-color: transparent; }
-  </style>
 </body>
 </html>
