@@ -148,10 +148,15 @@ function getAdminData() {
         price: pmData[i][2],
         stock: parseInt(pmData[i][3]) || 0,
         isActive: pmData[i][4] === true || pmData[i][4] === 'TRUE',
+        cost: parseFloat(pmData[i][5]) || 0,
         imageUrl: pmData[i][6] || ""
       });
     }
   }
+
+  // Create a map for product costs for faster lookup during order processing
+  const costMap = {};
+  products.forEach(p => costMap[p.name] = p.cost);
 
   // Process orders
   for (let i = 1; i < orderData.length; i++) {
@@ -175,9 +180,18 @@ function getAdminData() {
       summary[product].total += qty;
 
       finance.total += rowPrice;
-      if (payMethod === 'จ่ายก่อน(แนบสลิป)' || payStatus === 'ชำระเงินแล้ว') finance.transfer += rowPrice;
-      else if (payMethod === 'จ่ายทีหลัง') finance.unpaid += rowPrice;
-      else finance.unpaid += rowPrice;
+      
+      // Calculate Profit: (Price - Cost) * Qty
+      const itemCost = costMap[product] || 0;
+      finance.totalProfit = (finance.totalProfit || 0) + (rowPrice - (itemCost * qty));
+
+      if (payMethod === 'จ่ายก่อน(แนบสลิป)' || payStatus === 'ชำระเงินแล้ว') {
+        finance.transfer += rowPrice;
+      } else if (payMethod === 'เงินสด') {
+        finance.cash += rowPrice;
+      } else {
+        finance.unpaid += rowPrice;
+      }
 
       if (!ordersMap[orderId]) {
         ordersMap[orderId] = {
@@ -272,15 +286,15 @@ function manageProduct(data) {
   
   if (data.mode === 'create') {
     const newId = Utilities.getUuid();
-    const newRow = [newId, data.name, data.price, data.stock, false, '', data.imageUrl || ''];
+    const newRow = [newId, data.name, data.price, data.stock || 0, false, data.cost || 0, data.imageUrl || ''];
     sheet.appendRow(newRow);
   } else if (data.mode === 'update') {
     for (let i = 1; i < values.length; i++) {
       if (values[i][0] === data.id || values[i][1] === data.oldName) {
         sheet.getRange(i + 1, 2).setValue(data.name);
         sheet.getRange(i + 1, 3).setValue(data.price);
-        // Do not update stock and isActive here unless explicitly provided, because update might just be metadata
         if (data.stock !== undefined) sheet.getRange(i + 1, 4).setValue(data.stock);
+        if (data.cost !== undefined) sheet.getRange(i + 1, 6).setValue(data.cost); // Index 5 = Column F
         sheet.getRange(i + 1, 7).setValue(data.imageUrl || '');
         break;
       }

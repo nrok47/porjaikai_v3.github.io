@@ -28,7 +28,10 @@
   <!-- Header Navigation -->
   <nav class="sticky top-0 z-50 blur-glass border-b border-white/20">
     <div class="max-w-2xl mx-auto flex justify-between items-center p-4">
-      <h1 class="text-xl font-black text-orange-600">🍽️ ร้านพอใจขาย</h1>
+      <div class="flex items-center space-x-3">
+        <h1 class="text-xl font-black text-orange-600">🍽️ ร้านพอใจขาย</h1>
+        <img id="userProfileImg" src="favicon.ico" class="w-8 h-8 rounded-full border-2 border-orange-200 hidden md:block">
+      </div>
       <div class="flex space-x-2">
         <button onclick="showTab('today')" class="today-btn px-4 py-2 font-bold text-sm rounded-lg bg-orange-600 text-white transition">📊 วันนี้</button>
         <button onclick="showTab('order')" class="order-btn px-4 py-2 font-bold text-sm rounded-lg bg-slate-200 text-slate-600 transition">🛒 สั่ง</button>
@@ -149,15 +152,42 @@
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbw__14dtWhHmEX1Jalewg5MjH4N6k8vNMhHD104E2R9NTYhJT6FNKQtbSn2IXZoGa8CQw/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyay0fTDeQw7WdfMybJB34lzQv6Jjus4N3Qe2ULBzloa-uozl8z_NQy_CqELCXWaLxtlg/exec";
+    const LIFF_ID = "2009833407-3mbGMf7p";
     
-    let user = { id: "GUEST", name: "ชาวศอ.10" };
+    let user = { id: "GUEST", name: "ชาวศอ.10", picture: "" };
     let menuData = [];
     let cart = {};
     let deliveryMethod = 'ส่งที่โต๊ะ';
     let paymentMethod = 'จ่ายก่อน(แนบสลิป)';
     let slipBase64 = '';
     let adminAuthenticated = false;
+
+    // ============ LIFF INITIALIZATION ============
+    async function initLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          user.id = profile.userId;
+          user.name = profile.displayName;
+          user.picture = profile.pictureUrl;
+          
+          // Update profile image in UI if exists
+          const profileImg = document.getElementById('userProfileImg');
+          if (profileImg) profileImg.src = user.picture;
+          
+          loadDashboard();
+        } else {
+          liff.login();
+        }
+      } catch (err) {
+        console.error('LIFF Initialization failed', err);
+        loadDashboard(); // Fallback for browser testing
+      }
+    }
+
+    window.onload = initLiff;
 
     // ============ TAB MANAGEMENT ============
     function showTab(tabId) {
@@ -485,17 +515,33 @@
           `).join('');
         }
 
-        // Counters
-        const liveOrderCount = document.getElementById('liveOrderCount');
-        if (liveOrderCount) liveOrderCount.innerText = menuData.reduce((a,p) => a + p.buyers.length, 0);
-        const totalBuyers = document.getElementById('totalBuyers');
-        if (totalBuyers) totalBuyers.innerText = new Set(menuData.flatMap(p => p.buyers.map(b => b.name))).size;
-
         // Render Today's Order Summary
         const cycleTitle = document.getElementById('cycleTitle');
         if (cycleTitle) {
-          cycleTitle.innerText = `ออเดอร์ส่งรอบถัดไป จ้า 🚀`;
+          cycleTitle.innerText = `ออเดอร์ส่งรอบถัดไป จ้า (ประจำเมนู ${result.data.cycleDateText || ''}) 🚀`;
         }
+        
+        // Show My Orders
+        const myStatusSection = document.getElementById('myStatusSection');
+        const myOrdersList = document.getElementById('myOrdersList');
+        if (myStatusSection && result.data.myOrders && result.data.myOrders.length > 0) {
+          myStatusSection.classList.remove('hidden');
+          myOrdersList.innerHTML = result.data.myOrders.map(o => `
+            <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 ${o.payStatus === 'ชำระเงินแล้ว' ? 'border-green-500' : 'border-blue-400'}">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="font-bold text-slate-800">${o.name} (x${o.qty})</p>
+                  <p class="text-[10px] text-slate-400">Order ID: #${o.id.slice(0,6)}</p>
+                </div>
+                <div class="text-right">
+                  <span class="badge ${o.payStatus === 'ชำระเงินแล้ว' ? 'badge-live' : 'badge-pending'}">${o.payStatus}</span>
+                  <p class="text-[10px] font-bold text-slate-500 mt-1">${o.delStatus}</p>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+
         const todayOrdersContainer = document.getElementById('todayOrdersContainer');
         if (todayOrdersContainer) {
           const summaryData = result.data.todaySummary || [];
@@ -504,9 +550,11 @@
           } else {
             todayOrdersContainer.innerHTML = summaryData.map(group => `
               <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
-                <p class="text-orange-700 font-black text-base">${group.name}</p>
-                <p class="text-sm text-slate-500 mb-3">จำนวนรวม ${group.totalQty} รายการ</p>
-                <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-4">
+                <div class="flex justify-between items-center mb-3">
+                  <p class="text-orange-700 font-black text-base">${group.name}</p>
+                  <span class="bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full text-xs font-black">${group.totalQty} กล่อง</span>
+                </div>
+                <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-4 border-t border-slate-100 pt-3">
                   ${group.buyers.map(b => `<li>${b.name}${b.qty > 1 ? ` (x${b.qty})` : ''}</li>`).join('')}
                 </ol>
               </div>
@@ -519,11 +567,7 @@
       } catch(e) { console.error(e); }
     }
 
-    // Set default selection
-    setDelivery('ส่งที่โต๊ะ', document.querySelector('.delivery-btn:first-child'));
-    setPayment('จ่ายก่อน(แนบสลิป)', document.querySelector('.payment-btn:first-child'));
-
-    loadDashboard();
+    // loadDashboard() no longer called at bottom, called by initLiff
   </script>
 
 </body>

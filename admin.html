@@ -67,25 +67,25 @@
 
       <!-- Financial Summary Grid (Bento Layout) -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center border-t-4 border-orange-500">
           <p class="text-sm font-bold text-slate-500 uppercase mb-2">ยอดขายวันนี้</p>
           <p class="text-3xl font-black text-orange-600" id="finTotal">0</p>
-          <p class="text-xs text-slate-400 mt-2">฿</p>
+          <p class="text-xs text-slate-400 mt-2">Revenue</p>
         </div>
-        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-          <p class="text-sm font-bold text-slate-500 uppercase mb-2">โอนเงิน</p>
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center border-t-4 border-green-600">
+          <p class="text-sm font-bold text-slate-500 uppercase mb-2">กำไรสุทธิ</p>
+          <p class="text-3xl font-black text-green-600" id="finProfit">0</p>
+          <p class="text-xs text-slate-400 mt-2">Net Profit</p>
+        </div>
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center border-t-4 border-blue-600">
+          <p class="text-sm font-bold text-slate-500 uppercase mb-2">เงินโอน (ในบัญชี)</p>
           <p class="text-3xl font-black text-blue-600" id="finTransfer">0</p>
-          <span class="badge badge-pending mt-2">💳</span>
+          <span class="badge badge-pending mt-2">Bank Transfer</span>
         </div>
-        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-          <p class="text-sm font-bold text-slate-500 uppercase mb-2">เงินสด</p>
-          <p class="text-3xl font-black text-green-600" id="finCash">0</p>
-          <span class="badge badge-success mt-2">💵</span>
-        </div>
-        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-          <p class="text-sm font-bold text-slate-500 uppercase mb-2">ค้างจ่าย</p>
-          <p class="text-3xl font-black text-red-600" id="finUnpaid">0</p>
-          <span class="badge badge-warning mt-2">⏳</span>
+        <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center border-t-4 border-emerald-500">
+          <p class="text-sm font-bold text-slate-500 uppercase mb-2">เงินสด (ในมือ)</p>
+          <p class="text-3xl font-black text-emerald-600" id="finCash">0</p>
+          <span class="badge badge-success mt-2">Cash Flow</span>
         </div>
       </div>
 
@@ -106,16 +106,25 @@
           <button onclick="document.getElementById('productForm').classList.toggle('hidden')" class="px-4 py-2 bg-slate-100 font-bold rounded-lg text-sm">+ สร้างใหม่</button>
         </div>
         
-        <div id="productForm" class="hidden bg-slate-50 p-6 rounded-xl mb-6 space-y-4 border border-slate-200">
+        <div id="productForm" class="hidden bg-white p-6 rounded-xl mb-6 space-y-4 border-2 border-orange-100 shadow-inner">
           <input type="hidden" id="prodId">
-          <input type="text" id="prodName" placeholder="ชื่อเมนู" class="w-full border-2 border-slate-300 p-3 rounded-lg font-bold">
-          <div class="grid grid-cols-2 gap-3">
-            <input type="number" id="prodPrice" placeholder="ราคา" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-center">
-            <input type="text" id="prodImg" placeholder="URL รูป" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-sm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" id="prodName" placeholder="ชื่อเมนู (เช่น ข้าวมันไก่)" class="w-full border-2 border-slate-200 p-3 rounded-lg font-bold">
+            <input type="text" id="prodImg" placeholder="URL รูปภาพ (ถ้ามี)" class="w-full border-2 border-slate-200 p-3 rounded-lg font-bold text-sm">
           </div>
-          <div class="flex space-x-2">
-            <button onclick="saveProduct()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">💾 บันทึกเก็บไว้</button>
-            <button onclick="clearProduct()" class="flex-1 bg-slate-300 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-400">ล้างฟอร์ม</button>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-bold text-slate-500 block mb-1 ml-1">ราคาขาย (฿)</label>
+              <input type="number" id="prodPrice" placeholder="ราคาขาย" class="w-full border-2 border-slate-200 p-3 rounded-lg font-black text-orange-600">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500 block mb-1 ml-1">ต้นทุน (฿)</label>
+              <input type="number" id="prodCost" placeholder="ต้นทุน" class="w-full border-2 border-slate-200 p-3 rounded-lg font-black text-blue-600">
+            </div>
+          </div>
+          <div class="flex space-x-2 pt-2">
+            <button onclick="saveProduct()" class="flex-1 bg-orange-600 text-white font-black py-4 rounded-xl hover:bg-orange-700 shadow-lg">💾 บันทึกเมนูนี้</button>
+            <button onclick="clearProduct()" class="px-6 bg-slate-200 text-slate-600 font-bold py-4 rounded-xl">ล้าง</button>
           </div>
         </div>
 
@@ -160,7 +169,7 @@
   </div>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbw__14dtWhHmEX1Jalewg5MjH4N6k8vNMhHD104E2R9NTYhJT6FNKQtbSn2IXZoGa8CQw/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyay0fTDeQw7WdfMybJB34lzQv6Jjus4N3Qe2ULBzloa-uozl8z_NQy_CqELCXWaLxtlg/exec";
     
     let adminAuth = false;
     let allProducts = [];
@@ -202,10 +211,10 @@
         const data = result.data;
 
         // Financial
-        document.getElementById('finTotal').innerText = data.finance.total;
-        document.getElementById('finTransfer').innerText = data.finance.transfer;
-        document.getElementById('finCash').innerText = data.finance.cash;
-        document.getElementById('finUnpaid').innerText = data.finance.unpaid || 0;
+        document.getElementById('finTotal').innerText = (data.finance.total || 0).toLocaleString();
+        document.getElementById('finProfit').innerText = (data.finance.totalProfit || 0).toLocaleString();
+        document.getElementById('finTransfer').innerText = (data.finance.transfer || 0).toLocaleString();
+        document.getElementById('finCash').innerText = (data.finance.cash || 0).toLocaleString();
 
         // Products
         allProducts = data.products || [];
@@ -308,6 +317,7 @@
       document.getElementById('prodId').value = p.id || '';
       document.getElementById('prodName').value = p.name;
       document.getElementById('prodPrice').value = p.price;
+      document.getElementById('prodCost').value = p.cost || 0;
       document.getElementById('prodImg').value = p.imageUrl || '';
       document.getElementById('productForm').classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -317,6 +327,7 @@
       document.getElementById('prodId').value = '';
       document.getElementById('prodName').value = '';
       document.getElementById('prodPrice').value = '';
+      document.getElementById('prodCost').value = '';
       document.getElementById('prodImg').value = '';
     }
 
@@ -325,6 +336,7 @@
       const oldName = id ? allProducts.find(p => p.id === id)?.name : '';
       const name = document.getElementById('prodName').value;
       const price = parseInt(document.getElementById('prodPrice').value) || 0;
+      const cost = parseInt(document.getElementById('prodCost').value) || 0;
       const imageUrl = document.getElementById('prodImg').value;
 
       if(!name || price === 0) { alert('⚠️ ใส่ข้อมูลชื่อและราคาให้ครบ'); return; }
@@ -336,7 +348,7 @@
           body: JSON.stringify({
             action: 'manageProduct',
             password: '12399',
-            data: { mode, id, oldName, name, price, stock: 0, imageUrl }
+            data: { mode, id, oldName, name, price, cost, stock: 0, imageUrl }
           })
         });
         const result = await res.json();
