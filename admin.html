@@ -89,21 +89,33 @@
         </div>
       </div>
 
-      <!-- Product Management -->
-      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
-        <h2 class="font-black text-xl text-slate-800 mb-6">🛠️ จัดการเมนู</h2>
+      <!-- Daily Menu Planner -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft border-2 border-orange-200">
+        <h2 class="font-black text-2xl text-orange-600 mb-2">🍽️ เมนูที่เปิดรับออเดอร์ (รอบถัดไป)</h2>
+        <p class="text-sm text-slate-500 mb-6 font-bold">เลือกเมนูและใส่จำนวนที่จะเปิดรับออเดอร์ให้ลูกค้าสั่งได้เลย!</p>
+        <div id="dailyMenuList" class="space-y-3 mb-6"></div>
+        <button onclick="saveDailyMenu()" class="w-full bg-orange-600 text-white font-black py-4 rounded-xl text-lg hover:bg-orange-700 hover:scale-[1.02] shadow-lg transition transform">
+          ✅ บันทึกเมนูที่เปิดขายรอบนี้
+        </button>
+      </div>
+
+      <!-- Product Master Data Management -->
+      <div class="card-surface p-6 rounded-2xl shadow-xl-soft opacity-80 hover:opacity-100 transition">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="font-black text-xl text-slate-800">🛠️ คลังเมนูทั้งหมด (หลังบ้าน)</h2>
+          <button onclick="document.getElementById('productForm').classList.toggle('hidden')" class="px-4 py-2 bg-slate-100 font-bold rounded-lg text-sm">+ สร้างใหม่</button>
+        </div>
         
-        <div class="bg-slate-50 p-6 rounded-xl mb-6 space-y-4">
+        <div id="productForm" class="hidden bg-slate-50 p-6 rounded-xl mb-6 space-y-4 border border-slate-200">
           <input type="hidden" id="prodId">
           <input type="text" id="prodName" placeholder="ชื่อเมนู" class="w-full border-2 border-slate-300 p-3 rounded-lg font-bold">
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-2 gap-3">
             <input type="number" id="prodPrice" placeholder="ราคา" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-center">
-            <input type="number" id="prodStock" placeholder="โควต้า" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-center">
             <input type="text" id="prodImg" placeholder="URL รูป" class="border-2 border-slate-300 p-3 rounded-lg font-bold text-sm">
           </div>
           <div class="flex space-x-2">
-            <button onclick="saveProduct()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">💾 บันทึก</button>
-            <button onclick="clearProduct()" class="flex-1 bg-slate-300 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-400">ล้าง</button>
+            <button onclick="saveProduct()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">💾 บันทึกเก็บไว้</button>
+            <button onclick="clearProduct()" class="flex-1 bg-slate-300 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-400">ล้างฟอร์ม</button>
           </div>
         </div>
 
@@ -197,6 +209,7 @@
 
         // Products
         allProducts = data.products || [];
+        renderDailyMenuPlanner();
         renderProductCrud();
         renderWalkIn();
 
@@ -214,6 +227,63 @@
       }
     }
 
+    function renderDailyMenuPlanner() {
+      const list = document.getElementById('dailyMenuList');
+      if(allProducts.length === 0) {
+        list.innerHTML = '<p class="text-center text-slate-400 py-4">ยังไม่มีเมนูในคลัง</p>';
+        return;
+      }
+      list.innerHTML = allProducts.map((p, i) => `
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center shadow-sm space-x-4">
+          <input type="checkbox" id="daily_check_${i}" ${p.isActive ? 'checked' : ''} class="w-6 h-6 rounded text-orange-600 focus:ring-orange-500 cursor-pointer">
+          <div class="flex-grow">
+            <label for="daily_check_${i}" class="font-bold text-slate-800 cursor-pointer text-base">${p.name}</label>
+            <p class="text-xs text-orange-600 font-bold">${p.price}฿</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold text-slate-500">ใส่จำนวน:</span>
+            <input type="number" id="daily_stock_${i}" value="${p.isActive ? p.stock : 0}" class="w-20 border-2 border-slate-300 p-2 rounded-lg text-center font-black">
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function saveDailyMenu() {
+      const menusToSave = [];
+      allProducts.forEach((p, i) => {
+        const isChecked = document.getElementById(`daily_check_${i}`).checked;
+        const stock = parseInt(document.getElementById(`daily_stock_${i}`).value) || 0;
+        menusToSave.push({
+          id: p.id,
+          isActive: isChecked,
+          stock: isChecked ? stock : 0
+        });
+      });
+
+      try {
+        const btn = document.querySelector('button[onclick="saveDailyMenu()"]');
+        btn.innerText = '⏳ กำลังบันทึก...';
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'setDailyMenu',
+            password: '12399',
+            data: { menus: menusToSave }
+          })
+        });
+        const result = await res.json();
+        btn.innerText = '✅ บันทึกเมนูที่เปิดขายรอบนี้';
+        if(result.status === 'success') {
+          alert('✅ เปิดรอบรับออเดอร์สำเร็จเรียบร้อย!');
+          loadAdminData();
+        } else {
+          alert('❌ ' + result.message);
+        }
+      } catch(e) {
+        alert('❌ ' + e);
+      }
+    }
+
     function renderProductCrud() {
       const list = document.getElementById('productCrudList');
       if(allProducts.length === 0) {
@@ -221,14 +291,13 @@
         return;
       }
       list.innerHTML = allProducts.map((p, i) => `
-        <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-orange-400 flex justify-between items-center">
+        <div class="bg-slate-50 p-3 rounded-lg border-l-4 border-slate-300 flex justify-between items-center text-sm">
           <div>
-            <p class="font-bold text-slate-800">${p.name}</p>
-            <p class="text-sm"><span class="text-orange-600 font-bold">${p.price}฿</span> | โควต้า: <span class="font-bold">${p.stock}</span></p>
+            <p class="font-bold text-slate-700">${p.name}</p>
           </div>
           <div class="flex space-x-2">
-            <button onclick="editProduct(${i})" class="px-3 py-2 rounded-lg font-bold text-xs bg-blue-100 text-blue-700">✏️ แก้ไข</button>
-            <button onclick="deleteProduct('${p.name}')" class="px-3 py-2 rounded-lg font-bold text-xs bg-red-100 text-red-700">🗑️ ลบ</button>
+            <button onclick="editProduct(${i})" class="px-3 py-1 rounded-lg font-bold text-xs bg-slate-200 text-slate-700">✏️</button>
+            <button onclick="deleteProduct('${p.name}')" class="px-3 py-1 rounded-lg font-bold text-xs bg-red-100 text-red-500">🗑️</button>
           </div>
         </div>
       `).join('');
@@ -239,8 +308,8 @@
       document.getElementById('prodId').value = p.id || '';
       document.getElementById('prodName').value = p.name;
       document.getElementById('prodPrice').value = p.price;
-      document.getElementById('prodStock').value = p.stock;
       document.getElementById('prodImg').value = p.imageUrl || '';
+      document.getElementById('productForm').classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -248,7 +317,6 @@
       document.getElementById('prodId').value = '';
       document.getElementById('prodName').value = '';
       document.getElementById('prodPrice').value = '';
-      document.getElementById('prodStock').value = '';
       document.getElementById('prodImg').value = '';
     }
 
@@ -257,10 +325,9 @@
       const oldName = id ? allProducts.find(p => p.id === id)?.name : '';
       const name = document.getElementById('prodName').value;
       const price = parseInt(document.getElementById('prodPrice').value) || 0;
-      const stock = parseInt(document.getElementById('prodStock').value) || 0;
       const imageUrl = document.getElementById('prodImg').value;
 
-      if(!name || price === 0 || stock === 0) { alert('⚠️ ใส่ข้อมูลให้ครบ'); return; }
+      if(!name || price === 0) { alert('⚠️ ใส่ข้อมูลชื่อและราคาให้ครบ'); return; }
 
       try {
         const mode = id ? 'update' : 'create';
@@ -269,7 +336,7 @@
           body: JSON.stringify({
             action: 'manageProduct',
             password: '12399',
-            data: { mode, id, oldName, name, price, stock, imageUrl }
+            data: { mode, id, oldName, name, price, stock: 0, imageUrl }
           })
         });
         const result = await res.json();

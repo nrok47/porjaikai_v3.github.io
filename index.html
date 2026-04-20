@@ -44,60 +44,13 @@
       <div class="card-surface rounded-3xl p-6 shadow-xl-soft border border-orange-100">
         <div class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
-            <div class="inline-flex items-center gap-2 badge badge-live">⭐ มาแรงสุด</div>
-            <h2 class="text-2xl font-black text-slate-900">ร้านพอใจขายเปิดรับออเดอร์พรุ่งนี้จ้า</h2>
+            <div class="inline-flex items-center gap-2 badge badge-live">⭐ ออเดอร์รอบล่าสุด</div>
+            <h2 id="cycleTitle" class="text-2xl font-black text-slate-900">ร้านพอใจขายเปิดรับออเดอร์... </h2>
             <p class="text-sm text-slate-600">สรุปรายการสั่งจากไลน์กลุ่ม ให้เห็นชัดว่าใครสั่งอะไรบ้าง</p>
           </div>
-
-          <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
-            <p class="text-orange-700 font-black text-base">กระเพรา หมึก กุ้ง + ไข่ดาว + ข้าวกล้อง + ผลไม้</p>
-            <p class="text-sm text-slate-500 mb-3">กล่องละ 70 บาท จำนวน 6 กล่อง</p>
-            <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-4">
-              <li>อาร์ต</li>
-              <li>พัตต้า</li>
-              <li>พี่อุ๊</li>
-              <li>อิ่ง</li>
-              <li>พี่นาง</li>
-              <li>พี่แปป หมึก</li>
-            </ol>
-          </div>
-
-          <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
-            <p class="text-orange-700 font-black text-base">ผลไม้ปอกพร้อมทาน กล่องละ 30 บาท</p>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mt-3">
-              <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200">
-                <p class="font-black text-slate-900">🍇 องุ่นแดง</p>
-                <ol class="list-decimal list-inside text-slate-700 pl-4 mt-3 space-y-1">
-                  <li>พัตต้า</li>
-                  <li>ไม่ระบุ</li>
-                  <li>ไม่ระบุ</li>
-                </ol>
-              </div>
-              <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200">
-                <p class="font-black text-slate-900">🍉 แตงโม</p>
-                <ol class="list-decimal list-inside text-slate-700 pl-4 mt-3 space-y-1">
-                  <li>มะขาม</li>
-                  <li>มะขาม</li>
-                  <li>เก๋</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
-            <p class="text-orange-700 font-black text-base">น้ำเต้าหู้ 15 บาท จำนวน 10 ขวด</p>
-            <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-4 mt-3">
-              <li>มะขาม</li>
-              <li>มะขาม</li>
-              <li>มะขาม</li>
-              <li>มะขาม</li>
-              <li>พี่นาง</li>
-              <li>หลิน</li>
-              <li>ไม่ระบุ</li>
-              <li>ไม่ระบุ</li>
-              <li>ไม่ระบุ</li>
-              <li>ไม่ระบุ</li>
-            </ol>
+          
+          <div id="todayOrdersContainer" class="space-y-4 mt-4">
+            <!-- Dynamic content will be injected here -->
           </div>
         </div>
       </div>
@@ -584,7 +537,30 @@
         const liveOrderCount = document.getElementById('liveOrderCount');
         if (liveOrderCount) liveOrderCount.innerText = menuData.reduce((a,p) => a + p.buyers.length, 0);
         const totalBuyers = document.getElementById('totalBuyers');
-        if (totalBuyers) totalBuyers.innerText = new Set(menuData.flatMap(p => p.buyers)).size;
+        if (totalBuyers) totalBuyers.innerText = new Set(menuData.flatMap(p => p.buyers.map(b => b.name))).size;
+
+        // Render Today's Order Summary
+        const cycleTitle = document.getElementById('cycleTitle');
+        if (cycleTitle) {
+          cycleTitle.innerText = `ออเดอร์ส่งรอบถัดไป จ้า 🚀`;
+        }
+        const todayOrdersContainer = document.getElementById('todayOrdersContainer');
+        if (todayOrdersContainer) {
+          const summaryData = result.data.todaySummary || [];
+          if (summaryData.length === 0) {
+            todayOrdersContainer.innerHTML = `<p class="text-center text-slate-500 py-6">ยังไม่มีออเดอร์ในรอบนี้ สั่งเลย! 👇</p>`;
+          } else {
+            todayOrdersContainer.innerHTML = summaryData.map(group => `
+              <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
+                <p class="text-orange-700 font-black text-base">${group.name}</p>
+                <p class="text-sm text-slate-500 mb-3">จำนวนรวม ${group.totalQty} รายการ</p>
+                <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-4">
+                  ${group.buyers.map(b => `<li>${b.name}${b.qty > 1 ? ` (x${b.qty})` : ''}</li>`).join('')}
+                </ol>
+              </div>
+            `).join('');
+          }
+        }
 
         renderMenu();
         updateTotal();

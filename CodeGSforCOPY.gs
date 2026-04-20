@@ -32,9 +32,21 @@ function doPost(e) {
     if (payload.action === 'createOrder') return responseJSON({ status: 'success', data: createOrder(payload.data) }, headers);
     if (payload.action === 'updateStatus') return responseJSON({ status: 'success', data: updateStatus(payload.data) }, headers);
     if (payload.action === 'manageProduct') return responseJSON({ status: 'success', data: manageProduct(payload.data) }, headers);
+    if (payload.action === 'setDailyMenu') return responseJSON({ status: 'success', data: setDailyMenu(payload.data) }, headers);
   } catch (error) {
     return responseJSON({ status: 'error', message: error.toString() }, headers);
   }
+}
+
+// --- รอบการขาย (16.00 น. วันก่อน ถึง 16.00 น. วันนี้) ---
+function getCycleStart() {
+  const now = new Date();
+  let cycleStart = new Date(now);
+  if (now.getHours() < 16) {
+    cycleStart.setDate(cycleStart.getDate() - 1);
+  }
+  cycleStart.setHours(16, 0, 0, 0);
+  return cycleStart;
 }
 
 // --- สรุปข้อมูลหน้าบ้าน (Dashboard & My Orders) ---
@@ -45,7 +57,9 @@ function getDashboardData(lineId) {
   
   const pmData = pmSheet.getDataRange().getValues();
   const orderData = orderSheet.getDataRange().getValues();
-  const today = new Date(); today.setHours(0,0,0,0);
+  const cycleStart = getCycleStart();
+  const cycleEnd = new Date(cycleStart);
+  cycleEnd.setDate(cycleEnd.getDate() + 1);
   
   let bookings = {}; 
   let myOrders = [];
@@ -57,10 +71,11 @@ function getDashboardData(lineId) {
     const customer = orderData[i][2];
     const currentLineId = orderData[i][8];
 
-    if (rowDate >= today) {
+    // เช็คออเดอร์ในรอบ 16.00 เป็นต้นไป
+    if (rowDate >= cycleStart) {
       if (!bookings[prodName]) bookings[prodName] = { totalQty: 0, buyers: [] };
       bookings[prodName].totalQty += qty;
-      bookings[prodName].buyers.push(customer);
+      bookings[prodName].buyers.push({ name: customer, qty: qty });
       
       // ดักจับออเดอร์ของตัวเอง
       if (lineId && currentLineId === lineId) {
@@ -78,8 +93,9 @@ function getDashboardData(lineId) {
   
   let products = [];
   for (let i = 1; i < pmData.length; i++) {
-    const quota = parseInt(pmData[i][3]) || 0;
-    if (quota > 0) {
+    const isActive = pmData[i][4] === true || pmData[i][4] === 'TRUE';
+    if (isActive) {
+      const quota = parseInt(pmData[i][3]) || 0;
       const name = pmData[i][1];
       products.push({
         name: name, price: pmData[i][2], quota: quota,
@@ -89,7 +105,23 @@ function getDashboardData(lineId) {
       });
     }
   }
-  return { products, myOrders };
+  
+  // จัดเตรียมข้อมูลสำหรับหน้าสรุปวันนี้ (bookings list)
+  let todaySummary = [];
+  for (const [prodName, data] of Object.entries(bookings)) {
+    todaySummary.push({
+      name: prodName,
+      totalQty: data.totalQty,
+      buyers: data.buyers
+    });
+  }
+
+  return { 
+    products, 
+    myOrders,
+    todaySummary,
+    cycleDateText: Utilities.formatDate(cycleEnd, "GMT+7", "d MMM")
+  };
 }
 
 // --- สรุปข้อมูลหลังบ้าน (Admin Dashboard) ---
@@ -101,7 +133,7 @@ function getAdminData() {
   const pmData = pmSheet.getDataRange().getValues();
   const orderData = orderSheet.getDataRange().getValues();
   
-  const today = new Date(); today.setHours(0,0,0,0);
+  const cycleStart = getCycleStart();
   let summary = {}; let ordersMap = {}; 
   let finance = { total: 0, transfer: 0, cash: 0, unpaid: 0 };
   let monthlyStats = {};
@@ -109,13 +141,13 @@ function getAdminData() {
 
   // Build products list with IDs
   for (let i = 1; i < pmData.length; i++) {
-    const quota = parseInt(pmData[i][3]) || 0;
-    if (quota > 0) {
+    if (pmData[i][1]) {
       products.push({
         id: pmData[i][0] || ('product_' + i),
         name: pmData[i][1],
         price: pmData[i][2],
-        stock: quota,
+        stock: parseInt(pmData[i][3]) || 0,
+        isActive: pmData[i][4] === true || pmData[i][4] === 'TRUE',
         imageUrl: pmData[i][6] || ""
       });
     }
@@ -130,7 +162,7 @@ function getAdminData() {
     // Monthly stats
     monthlyStats[monthKey] = (monthlyStats[monthKey] || 0) + rowPrice;
 
-    if (rowDate >= today) {
+    if (rowDate >= cycleStart) {
       const orderId = orderData[i][0];
       const product = orderData[i][3];
       const qty = parseInt(orderData[i][4]) || 0;
@@ -239,14 +271,16 @@ function manageProduct(data) {
   const values = sheet.getDataRange().getValues();
   
   if (data.mode === 'create') {
-    const newRow = ['', data.name, data.price, data.stock, '', '', data.imageUrl || ''];
+    const newId = Utilities.getUuid();
+    const newRow = [newId, data.name, data.price, data.stock, false, '', data.imageUrl || ''];
     sheet.appendRow(newRow);
   } else if (data.mode === 'update') {
     for (let i = 1; i < values.length; i++) {
       if (values[i][0] === data.id || values[i][1] === data.oldName) {
         sheet.getRange(i + 1, 2).setValue(data.name);
         sheet.getRange(i + 1, 3).setValue(data.price);
-        sheet.getRange(i + 1, 4).setValue(data.stock);
+        // Do not update stock and isActive here unless explicitly provided, because update might just be metadata
+        if (data.stock !== undefined) sheet.getRange(i + 1, 4).setValue(data.stock);
         sheet.getRange(i + 1, 7).setValue(data.imageUrl || '');
         break;
       }
@@ -256,6 +290,31 @@ function manageProduct(data) {
       if (values[i][0] === data.id || values[i][1] === data.oldName) {
         sheet.deleteRow(i + 1);
         break;
+      }
+    }
+  }
+  return { success: true };
+}
+
+// --- SET DAILY MENU (Bulk update isActive and stock) ---
+function setDailyMenu(data) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('seller (1)') || ss.getSheets()[0];
+  const values = sheet.getDataRange().getValues();
+  // data.menus is an array of { id, stock, isActive }
+  const menuMap = {};
+  data.menus.forEach(m => menuMap[m.id] = m);
+
+  for (let i = 1; i < values.length; i++) {
+    const rowId = values[i][0];
+    if (menuMap[rowId]) {
+      sheet.getRange(i + 1, 4).setValue(menuMap[rowId].stock);
+      sheet.getRange(i + 1, 5).setValue(menuMap[rowId].isActive);
+    } else {
+      // If a product is not in the active list passed, turn it off. (optional, depending on payload)
+      // Actually usually we just rely on passing EVERYTHING back.
+      if (data.menus.find(m => true)) { // if we have list, make others inactive
+        sheet.getRange(i + 1, 5).setValue(false);
       }
     }
   }
