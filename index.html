@@ -146,13 +146,13 @@
 
         <!-- Payment Method Toggle -->
         <div>
-          <p class="font-bold text-xs text-slate-500 uppercase mb-3">💰 จ่ายยังไง?</p>
+          <p class="font-bold text-xs text-slate-500 uppercase mb-3">💰 จ่ายเมื่อไหร่?</p>
           <div class="grid grid-cols-2 gap-3">
-            <button onclick="setPayment('โอนเงิน', this)" class="payment-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
-              📱 โอนเงิน
+            <button onclick="setPayment('จ่ายก่อน(แนบสลิป)', this)" class="payment-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
+              📸 จ่ายก่อน(แนบสลิป)
             </button>
-            <button onclick="setPayment('เงินสด', this)" class="payment-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
-              💵 เงินสด
+            <button onclick="setPayment('จ่ายทีหลัง', this)" class="payment-btn p-4 rounded-xl border-2 border-transparent bg-slate-100 text-slate-600 font-bold transition hover:scale-105 active:scale-95">
+              💵 จ่ายทีหลัง
             </button>
           </div>
         </div>
@@ -250,7 +250,7 @@
     let menuData = [];
     let cart = {};
     let deliveryMethod = 'ส่งที่โต๊ะ';
-    let paymentMethod = 'โอนเงิน';
+    let paymentMethod = 'จ่ายก่อน(แนบสลิป)';
     let slipBase64 = '';
     let adminAuthenticated = false;
 
@@ -287,7 +287,7 @@
 
       // Show/hide slip section conditionally
       const slipSection = document.getElementById('slipSection');
-      if(method === 'โอนเงิน') {
+      if(method === 'จ่ายก่อน(แนบสลิป)') {
         slipSection.classList.remove('hidden');
       } else {
         slipSection.classList.add('hidden');
@@ -390,8 +390,8 @@
       btn.disabled = true;
       btn.innerText = '⏳ กำลังส่ง...';
 
-      if (paymentMethod === 'โอนเงิน' && !slipBase64) {
-        alert('กรุณาแนบสลิปโอนเงินก่อนส่งคำสั่งซื้อ');
+      if (paymentMethod === 'จ่ายก่อน(แนบสลิป)' && !slipBase64) {
+        alert('กรุณาแนบสลิปก่อนส่งคำสั่งซื้อ');
         btn.disabled = false;
         btn.innerText = 'สั่งแล้ว 🚀';
         return;
@@ -593,7 +593,7 @@
 
     // Set default selection
     setDelivery('ส่งที่โต๊ะ', document.querySelector('.delivery-btn:first-child'));
-    setPayment('โอนเงิน', document.querySelector('.payment-btn:first-child'));
+    setPayment('จ่ายก่อน(แนบสลิป)', document.querySelector('.payment-btn:first-child'));
 
     loadDashboard();
   </script>

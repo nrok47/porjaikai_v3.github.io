@@ -143,8 +143,8 @@ function getAdminData() {
       summary[product].total += qty;
 
       finance.total += rowPrice;
-      if (payMethod === 'โอนเงิน' || payStatus === 'ชำระเงินแล้ว') finance.transfer += rowPrice;
-      else if (payMethod === 'เงินสด') finance.cash += rowPrice;
+      if (payMethod === 'จ่ายก่อน(แนบสลิป)' || payStatus === 'ชำระเงินแล้ว') finance.transfer += rowPrice;
+      else if (payMethod === 'จ่ายทีหลัง') finance.unpaid += rowPrice;
       else finance.unpaid += rowPrice;
 
       if (!ordersMap[orderId]) {

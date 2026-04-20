@@ -342,6 +342,7 @@
       }
       list.innerHTML = orders.map((o, i) => {
         const delivered = o.deliveryStatus === 'ส่งแล้ว';
+        const paid = o.payStatus === 'ชำระเงินแล้ว';
         return `
           <div class="bg-slate-50 p-4 rounded-lg border-l-4 ${delivered ? 'border-green-400' : 'border-blue-400'}">
             <div class="flex items-start space-x-4 mb-3">
@@ -350,13 +351,22 @@
                 <div>
                   <p class="font-black text-slate-800">${o.customer}</p>
                   <p class="text-sm text-slate-600 mt-1">${o.items.join(', ')}</p>
+                  <div class="flex gap-2 mt-2">
+                    <span class="badge ${delivered ? 'badge-success' : 'badge-pending'}">${delivered ? '✅ ส่งแล้ว' : '⏳ รอส่ง'}</span>
+                    <span class="badge ${paid ? 'badge-success' : 'badge-warning'}">${paid ? '💳 ชำระแล้ว' : '⏳ ค้างจ่าย'}</span>
+                    <span class="badge badge-pending text-xs">${o.payMethod}</span>
+                  </div>
                 </div>
               </div>
-              <span class="badge ${delivered ? 'badge-success' : 'badge-pending'}">${delivered ? '✅ ส่งแล้ว' : '⏳ รอส่ง'}</span>
             </div>
-            <button onclick="updateStatus('${o.orderId}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="w-full py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}">
-              ${delivered ? '↩️ ยกเลิก' : '📦 เช็กส่งของ'}
-            </button>
+            <div class="flex gap-2">
+              <button onclick="updateStatus('${o.orderId}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="flex-1 py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}">
+                ${delivered ? '↩️ ยกเลิก' : '📦 เช็กส่งของ'}
+              </button>
+              <button onclick="updateStatus('${o.orderId}', 'payment', '${paid ? 'รอชำระเงิน' : 'ชำระเงินแล้ว'}')" class="flex-1 py-2 rounded-lg font-bold text-xs transition ${paid ? 'bg-green-500 text-white' : 'bg-orange-500 text-white hover:bg-orange-600'}">
+                ${paid ? '↩️ ยกเลิก' : '💰 จ่ายแล้ว'}
+              </button>
+            </div>
           </div>
         `;
       }).join('');
