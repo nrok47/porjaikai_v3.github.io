@@ -325,7 +325,6 @@
     function renderMenu() {
       const container = document.getElementById('productList');
       container.innerHTML = '';
-      const fallbackImg = 'https://via.placeholder.com/200x200/FFE5CC/F97316?text=Menu';
       
       menuData.forEach(item => {
         const qty = cart[item.name] || 0;
@@ -333,7 +332,9 @@
         container.innerHTML += `
           <div class="card-surface p-4 rounded-xl shadow-sm overflow-hidden ${sold ? 'opacity-50 grayscale' : ''}">
             <div class="flex space-x-4">
-              <img src="${item.imageUrl || fallbackImg}" onerror="this.src='${fallbackImg}'" class="w-24 h-24 object-cover rounded-lg">
+              <div class="w-24 h-24 rounded-lg bg-gradient-to-br from-orange-200 to-orange-300 flex items-center justify-center text-center p-2 flex-shrink-0">
+                ${item.imageUrl ? `<img src="${item.imageUrl}" class="w-full h-full object-cover rounded-lg">` : `<span class="text-xs font-bold text-orange-600">🍽️<br>${item.name}</span>`}
+              </div>
               <div class="flex-grow">
                 <h3 class="font-black text-slate-800">${item.name}</h3>
                 <p class="text-orange-600 font-bold text-lg">${item.price} ฿</p>
