@@ -41,43 +41,66 @@
 
     <!-- ==================== TAB 1: TODAY'S ORDERS ==================== -->
     <div id="tab-today" class="tab-content space-y-6">
-      
-      <!-- Featured Dish Hero -->
-      <div class="card-surface rounded-2xl overflow-hidden shadow-xl-soft">
-        <div class="relative aspect-video bg-gradient-to-br from-orange-200 to-orange-300 flex items-center justify-center">
-          <div id="featuredImg" class="w-full h-full object-cover"></div>
-          <div class="absolute top-4 left-4 badge badge-live">⭐ มาแรงสุด</div>
-          <div class="absolute bottom-4 left-4 right-4 bg-black/40 text-white p-3 rounded-xl backdrop-blur">
-            <p class="font-black text-lg" id="featuredName">กำลังโหลด...</p>
-            <p class="text-xs opacity-80" id="featuredDesc">ชานชาลาดโต้ว ของเด็กศอ</p>
+      <div class="card-surface rounded-3xl p-6 shadow-xl-soft border border-orange-100">
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <div class="inline-flex items-center gap-2 badge badge-live">⭐ มาแรงสุด</div>
+            <h2 class="text-2xl font-black text-slate-900">ร้านพอใจขายเปิดรับออเดอร์พรุ่งนี้จ้า</h2>
+            <p class="text-sm text-slate-600">สรุปรายการสั่งจากไลน์กลุ่ม ให้เห็นชัดว่าใครสั่งอะไรบ้าง</p>
+          </div>
+
+          <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
+            <p class="text-orange-700 font-black text-base">กระเพรา หมึก กุ้ง + ไข่ดาว + ข้าวกล้อง + ผลไม้</p>
+            <p class="text-sm text-slate-500 mb-3">กล่องละ 70 บาท จำนวน 6 กล่อง</p>
+            <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-4">
+              <li>อาร์ต</li>
+              <li>พัตต้า</li>
+              <li>พี่อุ๊</li>
+              <li>อิ่ง</li>
+              <li>พี่นาง</li>
+              <li>พี่แปป หมึก</li>
+            </ol>
+          </div>
+
+          <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
+            <p class="text-orange-700 font-black text-base">ผลไม้ปอกพร้อมทาน กล่องละ 30 บาท</p>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mt-3">
+              <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200">
+                <p class="font-black text-slate-900">🍇 องุ่นแดง</p>
+                <ol class="list-decimal list-inside text-slate-700 pl-4 mt-3 space-y-1">
+                  <li>พัตต้า</li>
+                  <li>ไม่ระบุ</li>
+                  <li>ไม่ระบุ</li>
+                </ol>
+              </div>
+              <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200">
+                <p class="font-black text-slate-900">🍉 แตงโม</p>
+                <ol class="list-decimal list-inside text-slate-700 pl-4 mt-3 space-y-1">
+                  <li>มะขาม</li>
+                  <li>มะขาม</li>
+                  <li>เก๋</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl bg-slate-50 p-5 border border-slate-200">
+            <p class="text-orange-700 font-black text-base">น้ำเต้าหู้ 15 บาท จำนวน 10 ขวด</p>
+            <ol class="list-decimal list-inside space-y-1 text-slate-700 pl-4 mt-3">
+              <li>มะขาม</li>
+              <li>มะขาม</li>
+              <li>มะขาม</li>
+              <li>มะขาม</li>
+              <li>พี่นาง</li>
+              <li>หลิน</li>
+              <li>ไม่ระบุ</li>
+              <li>ไม่ระบุ</li>
+              <li>ไม่ระบุ</li>
+              <li>ไม่ระบุ</li>
+            </ol>
           </div>
         </div>
       </div>
-
-      <!-- Live Count & Engagement -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="card-surface p-5 rounded-2xl shadow-xl-soft text-center">
-          <p class="text-3xl font-black text-orange-600" id="liveOrderCount">0</p>
-          <p class="text-xs font-bold text-slate-500 uppercase mt-1">ออเดอร์ในชั่วโมงนี้</p>
-        </div>
-        <div class="card-surface p-5 rounded-2xl shadow-xl-soft text-center">
-          <p class="text-3xl font-black text-green-600" id="totalBuyers">0</p>
-          <p class="text-xs font-bold text-slate-500 uppercase mt-1">คนที่สั่งแล้ว</p>
-        </div>
-      </div>
-
-      <!-- Trending Products -->
-      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
-        <h2 class="font-black text-lg text-slate-800 mb-4">🔥 ที่ชาวศอ.10 ชอบสุด</h2>
-        <div id="trendingList" class="space-y-3"></div>
-      </div>
-
-      <!-- Recent Orders Activity -->
-      <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
-        <h2 class="font-black text-lg text-slate-800 mb-4">📱 เพื่อนๆ กำลังสั่ง</h2>
-        <div id="recentOrdersList" class="space-y-3"></div>
-      </div>
-
     </div>
 
     <!-- ==================== TAB 2: ORDER FOOD ==================== -->
@@ -269,7 +292,9 @@
       } else {
         slipSection.classList.add('hidden');
         slipBase64 = '';
+        document.getElementById('slipInput').value = '';
         document.getElementById('previewContainer').classList.add('hidden');
+        document.getElementById('uploadLabel').textContent = '📸 แนบสลิปโอนเงิน';
       }
     }
 
@@ -365,6 +390,12 @@
       btn.disabled = true;
       btn.innerText = '⏳ กำลังส่ง...';
 
+      if (paymentMethod === 'โอนเงิน' && !slipBase64) {
+        alert('กรุณาแนบสลิปโอนเงินก่อนส่งคำสั่งซื้อ');
+        btn.disabled = false;
+        btn.innerText = 'สั่งแล้ว 🚀';
+        return;
+      }
       try {
         const res = await fetch(GAS_URL, {
           method: 'POST',
@@ -521,31 +552,39 @@
         menuData.forEach(p => cart[p.name] = 0);
 
         // Trending
-        const trending = menuData.sort((a,b) => b.buyers.length - a.buyers.length).slice(0, 3);
-        document.getElementById('trendingList').innerHTML = trending.map(p => `
-          <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-            <p class="font-bold text-slate-800">${p.name}</p>
-            <p class="badge badge-live">${p.buyers.length} ชาว</p>
-          </div>
-        `).join('');
+        const trendingList = document.getElementById('trendingList');
+        if (trendingList) {
+          const trending = menuData.sort((a,b) => b.buyers.length - a.buyers.length).slice(0, 3);
+          trendingList.innerHTML = trending.map(p => `
+            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+              <p class="font-bold text-slate-800">${p.name}</p>
+              <p class="badge badge-live">${p.buyers.length} ชาว</p>
+            </div>
+          `).join('');
+        }
 
         // Live Orders
-        const recentBuyers = [];
-        menuData.forEach(p => {
-          p.buyers.forEach((b, i) => {
-            if(i < 2) recentBuyers.push({ buyer: b, product: p.name });
+        const recentOrdersList = document.getElementById('recentOrdersList');
+        if (recentOrdersList) {
+          const recentBuyers = [];
+          menuData.forEach(p => {
+            p.buyers.forEach((b, i) => {
+              if(i < 2) recentBuyers.push({ buyer: b, product: p.name });
+            });
           });
-        });
-        document.getElementById('recentOrdersList').innerHTML = recentBuyers.map(o => `
-          <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-bold">${o.buyer.charAt(0)}</div>
-            <p class="text-sm"><span class="font-bold">${o.buyer}</span> <span class="text-slate-500">สั่ง</span> <span class="font-bold text-orange-600">${o.product}</span></p>
-          </div>
-        `).join('');
+          recentOrdersList.innerHTML = recentBuyers.map(o => `
+            <div class="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-bold">${o.buyer.charAt(0)}</div>
+              <p class="text-sm"><span class="font-bold">${o.buyer}</span> <span class="text-slate-500">สั่ง</span> <span class="font-bold text-orange-600">${o.product}</span></p>
+            </div>
+          `).join('');
+        }
 
         // Counters
-        document.getElementById('liveOrderCount').innerText = menuData.reduce((a,p) => a + p.buyers.length, 0);
-        document.getElementById('totalBuyers').innerText = new Set(menuData.flatMap(p => p.buyers)).size;
+        const liveOrderCount = document.getElementById('liveOrderCount');
+        if (liveOrderCount) liveOrderCount.innerText = menuData.reduce((a,p) => a + p.buyers.length, 0);
+        const totalBuyers = document.getElementById('totalBuyers');
+        if (totalBuyers) totalBuyers.innerText = new Set(menuData.flatMap(p => p.buyers)).size;
 
         renderMenu();
         updateTotal();

@@ -170,6 +170,20 @@ function responseJSON(data, headers = {"Access-Control-Allow-Origin": "*"}) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
 
+function saveSlipToDrive(base64, orderId) {
+  if (!base64) return '';
+  const matches = base64.match(/^data:(image\/[a-zA-Z]+);base64,(.*)$/);
+  if (!matches) return '';
+  const contentType = matches[1];
+  const imageData = matches[2];
+  const bytes = Utilities.base64Decode(imageData);
+  const extension = contentType.split('/')[1] || 'jpg';
+  const blob = Utilities.newBlob(bytes, contentType, `${orderId}_slip.${extension}`);
+  const folder = DriveApp.getFolderById(SLIP_FOLDER_ID);
+  const file = folder.createFile(blob);
+  return file.getUrl();
+}
+
 // --- CREATE ORDER ---
 function createOrder(data) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -177,6 +191,7 @@ function createOrder(data) {
   
   const orderId = Utilities.getUuid();
   const timestamp = new Date();
+  const slipUrl = data.slipBase64 ? saveSlipToDrive(data.slipBase64, orderId) : '';
   
   data.cart.forEach(item => {
     const row = [
@@ -187,8 +202,8 @@ function createOrder(data) {
       item.qty,
       item.price * item.qty,
       'รอชำระเงิน',
-      '', // slipUrl
-      data.lineId || '', // lineId
+      slipUrl,
+      data.lineId || '',
       data.deliveryMethod,
       'ยังไม่ได้ส่ง',
       data.paymentMethod
@@ -196,7 +211,7 @@ function createOrder(data) {
     sheet.appendRow(row);
   });
   
-  return { orderId: orderId };
+  return { orderId: orderId, slipUrl: slipUrl };
 }
 
 // --- UPDATE ORDER STATUS ---
