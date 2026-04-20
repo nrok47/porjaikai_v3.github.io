@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sookjai Collective - Daily Stock Planning</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .quantity-input {
+            width: 80px;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#7db3ff",
+                        "tertiary": "#005caa",
+                        "error-container": "#f95630",
+                        "inverse-primary": "#f97f06",
+                        "on-error": "#ffefec",
+                        "on-primary-fixed": "#000000",
+                        "secondary-container": "#9df197",
+                        "on-tertiary-fixed": "#001834",
+                        "surface-tint": "#914700",
+                        "on-tertiary": "#eef3ff",
+                        "secondary": "#176a21",
+                        "primary-container": "#f97f06",
+                        "surface-variant": "#ffd5b1",
+                        "surface-container": "#ffe3cd",
+                        "on-primary-container": "#3b1900",
+                        "inverse-on-surface": "#c59363",
+                        "secondary-dim": "#025d16",
+                        "on-tertiary-fixed-variant": "#003a6e",
+                        "background": "#fff4ee",
+                        "primary-fixed": "#f97f06",
+                        "on-surface": "#472701",
+                        "surface-container-high": "#ffdcbf",
+                        "on-error-container": "#520c00",
+                        "inverse-surface": "#1a0a00",
+                        "on-secondary-fixed": "#00460e",
+                        "on-background": "#472701",
+                        "surface-container-low": "#ffeee1",
+                        "on-secondary-container": "#005c15",
+                        "primary-dim": "#7f3d00",
+                        "on-secondary": "#d1ffc8",
+                        "on-surface-variant": "#7c5329",
+                        "surface-dim": "#ffca9b",
+                        "outline": "#9b6d41",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#4a2100",
+                        "tertiary-fixed": "#7db3ff",
+                        "surface-container-highest": "#ffd5b1",
+                        "secondary-fixed": "#9df197",
+                        "secondary-fixed-dim": "#90e28a",
+                        "tertiary-dim": "#005095",
+                        "error-dim": "#b92902",
+                        "surface": "#fff4ee",
+                        "primary-fixed-dim": "#e67400",
+                        "on-primary": "#fff0e8",
+                        "surface-bright": "#fff4ee",
+                        "error": "#b02500",
+                        "tertiary-fixed-dim": "#60a5ff",
+                        "on-tertiary-container": "#00315f",
+                        "on-secondary-fixed-variant": "#12661e",
+                        "primary": "#914700",
+                        "outline-variant": "#d7a372"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+    <!-- TopAppBar -->
+    <header class="bg-orange-50/90 dark:bg-stone-950/90 font-['Plus_Jakarta_Sans'] font-bold tracking-tight docked full-width top-0 sticky z-50 no-border shadow-none bg-orange-100/50 dark:bg-stone-900/50 flex justify-between items-center px-6 py-4 w-full backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-orange-700 dark:text-orange-500" data-icon="grocery">grocery</span>
+            <h1 class="text-xl font-extrabold text-amber-950 dark:text-orange-50">Daily Stock Plan</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="todayDate" class="text-sm font-bold text-amber-900/70 dark:text-orange-300"></span>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Section 1: Date Selection & Status -->
+        <section class="mb-8">
+            <div class="bg-surface-container-low rounded-3xl p-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight text-on-surface">วางแผนเมนูพรุ่งนี้</h2>
+                        <p class="text-on-surface-variant text-sm mt-1">เลือกของที่จะขายและใส่จำนวน</p>
+                    </div>
+                    <div class="flex gap-3 flex-col sm:flex-row">
+                        <input id="planDate" type="date" class="px-4 py-2.5 rounded-full border-2 border-outline-variant/30 font-bold text-sm" />
+                        <button onclick="savePlan()" class="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-full font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+                            <span class="material-symbols-outlined text-lg">save</span>
+                            Save Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Menu Selection Grid -->
+        <section class="mb-8">
+            <h3 class="text-xl font-bold tracking-tight text-on-surface mb-4">เมนูที่มี</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Menu Item 1 -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border-2 border-surface-variant/20 hover:border-primary/30 transition-all">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-on-surface">ไก่ย่างสูตรลับ</h4>
+                                <p class="text-xs text-on-surface-variant mt-1">Grilled Chicken</p>
+                            </div>
+                            <span class="text-lg">🍗</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-surface-container-low rounded-xl px-3 py-2">
+                            <input type="checkbox" class="menu-check w-5 h-5 cursor-pointer" data-menu="chicken" />
+                            <label class="font-bold text-sm text-on-surface cursor-pointer flex-1">เลือกเมนูนี้</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-on-surface-variant">จำนวน:</label>
+                            <input type="number" class="quantity-input px-2 py-1 border border-outline-variant/30 rounded-lg text-center font-bold text-sm" placeholder="0" data-menu="chicken" min="0" />
+                            <span class="text-xs text-on-surface-variant">ชิ้น</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Item 2 -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border-2 border-surface-variant/20 hover:border-primary/30 transition-all">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-on-surface">ขนมจีนน้ำยา</h4>
+                                <p class="text-xs text-on-surface-variant mt-1">Khao Nom Jeen</p>
+                            </div>
+                            <span class="text-lg">🍜</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-surface-container-low rounded-xl px-3 py-2">
+                            <input type="checkbox" class="menu-check w-5 h-5 cursor-pointer" data-menu="noodles" />
+                            <label class="font-bold text-sm text-on-surface cursor-pointer flex-1">เลือกเมนูนี้</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-on-surface-variant">จำนวน:</label>
+                            <input type="number" class="quantity-input px-2 py-1 border border-outline-variant/30 rounded-lg text-center font-bold text-sm" placeholder="0" data-menu="noodles" min="0" />
+                            <span class="text-xs text-on-surface-variant">ชาม</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Item 3 -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border-2 border-surface-variant/20 hover:border-primary/30 transition-all">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-on-surface">ส้มตำปรุงพิเศษ</h4>
+                                <p class="text-xs text-on-surface-variant mt-1">Green Papaya Salad</p>
+                            </div>
+                            <span class="text-lg">🥗</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-surface-container-low rounded-xl px-3 py-2">
+                            <input type="checkbox" class="menu-check w-5 h-5 cursor-pointer" data-menu="papaya" />
+                            <label class="font-bold text-sm text-on-surface cursor-pointer flex-1">เลือกเมนูนี้</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-on-surface-variant">จำนวน:</label>
+                            <input type="number" class="quantity-input px-2 py-1 border border-outline-variant/30 rounded-lg text-center font-bold text-sm" placeholder="0" data-menu="papaya" min="0" />
+                            <span class="text-xs text-on-surface-variant">ชาม</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Item 4 -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border-2 border-surface-variant/20 hover:border-primary/30 transition-all">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-on-surface">ไส้เหล้าสูตรแม่ค้า</h4>
+                                <p class="text-xs text-on-surface-variant mt-1">Spicy Sausage</p>
+                            </div>
+                            <span class="text-lg">🌶️</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-surface-container-low rounded-xl px-3 py-2">
+                            <input type="checkbox" class="menu-check w-5 h-5 cursor-pointer" data-menu="sausage" />
+                            <label class="font-bold text-sm text-on-surface cursor-pointer flex-1">เลือกเมนูนี้</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-on-surface-variant">จำนวน:</label>
+                            <input type="number" class="quantity-input px-2 py-1 border border-outline-variant/30 rounded-lg text-center font-bold text-sm" placeholder="0" data-menu="sausage" min="0" />
+                            <span class="text-xs text-on-surface-variant">ชิ้น</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Item 5 -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border-2 border-surface-variant/20 hover:border-primary/30 transition-all">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-on-surface">ข้าวมันไก่จ้อย</h4>
+                                <p class="text-xs text-on-surface-variant mt-1">Hainanese Rice</p>
+                            </div>
+                            <span class="text-lg">🍚</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-surface-container-low rounded-xl px-3 py-2">
+                            <input type="checkbox" class="menu-check w-5 h-5 cursor-pointer" data-menu="rice" />
+                            <label class="font-bold text-sm text-on-surface cursor-pointer flex-1">เลือกเมนูนี้</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-on-surface-variant">จำนวน:</label>
+                            <input type="number" class="quantity-input px-2 py-1 border border-outline-variant/30 rounded-lg text-center font-bold text-sm" placeholder="0" data-menu="rice" min="0" />
+                            <span class="text-xs text-on-surface-variant">กระบะ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Item 6 -->
+                <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border-2 border-surface-variant/20 hover:border-primary/30 transition-all">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-on-surface">ลูกชิ้นขา</h4>
+                                <p class="text-xs text-on-surface-variant mt-1">Chicken Ball Leg</p>
+                            </div>
+                            <span class="text-lg">🍗</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-surface-container-low rounded-xl px-3 py-2">
+                            <input type="checkbox" class="menu-check w-5 h-5 cursor-pointer" data-menu="meatball" />
+                            <label class="font-bold text-sm text-on-surface cursor-pointer flex-1">เลือกเมนูนี้</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-on-surface-variant">จำนวน:</label>
+                            <input type="number" class="quantity-input px-2 py-1 border border-outline-variant/30 rounded-lg text-center font-bold text-sm" placeholder="0" data-menu="meatball" min="0" />
+                            <span class="text-xs text-on-surface-variant">ชิ้น</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Summary -->
+        <section class="mb-8">
+            <div class="bg-gradient-to-br from-secondary-container to-secondary-container/50 rounded-3xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="material-symbols-outlined text-secondary text-2xl">summarize</span>
+                    <h3 class="text-xl font-bold text-on-surface">สรุปแผนขายวันนี้</h3>
+                </div>
+                <div id="planSummary" class="space-y-2">
+                    <p class="text-on-surface-variant text-sm italic">เลือกเมนูและใส่จำนวนเพื่อดูสรุป</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Previous Plans -->
+        <section>
+            <h3 class="text-xl font-bold tracking-tight text-on-surface mb-4">แผนการขายที่ผ่านมา</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Previous Plan 1 -->
+                <div class="bg-surface-container-low rounded-2xl p-5">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <p class="font-bold text-on-surface">20 เมษายน 2026</p>
+                            <p class="text-xs text-on-surface-variant">เสาร์</p>
+                        </div>
+                        <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold">Completed</span>
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <p class="text-on-surface">ไก่ย่าง <span class="font-bold">25 ชิ้น</span></p>
+                        <p class="text-on-surface">ขนมจีนน้ำยา <span class="font-bold">15 ชาม</span></p>
+                        <p class="text-on-surface">ส้มตำ <span class="font-bold">20 ชาม</span></p>
+                    </div>
+                </div>
+
+                <!-- Previous Plan 2 -->
+                <div class="bg-surface-container-low rounded-2xl p-5">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <p class="font-bold text-on-surface">19 เมษายน 2026</p>
+                            <p class="text-xs text-on-surface-variant">ศุกร์</p>
+                        </div>
+                        <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold">Completed</span>
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <p class="text-on-surface">ไก่ย่าง <span class="font-bold">30 ชิ้น</span></p>
+                        <p class="text-on-surface">ข้าวมันไก่ <span class="font-bold">40 กระบะ</span></p>
+                        <p class="text-on-surface">ไส้เหล้า <span class="font-bold">25 ชิ้น</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- BottomNavBar -->
+    <nav class="bg-orange-50/80 dark:bg-stone-950/80 backdrop-blur-xl fixed bottom-0 w-full z-50 pb-safe no-border space-y-2 shadow-[0_-4px_24px_rgba(71,39,1,0.06)] flex justify-around items-center w-full px-4 py-3">
+        <a class="flex flex-col items-center justify-center text-amber-900/70 dark:text-stone-400 px-5 py-2 hover:bg-orange-100/50 dark:hover:bg-stone-800/50 rounded-full transition-colors group" href="index.html">
+            <span class="material-symbols-outlined group-active:scale-90 duration-200" data-icon="today">today</span>
+            <span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold">Today</span>
+        </a>
+        <a class="flex flex-col items-center justify-center bg-gradient-to-br from-orange-700 to-orange-500 text-white rounded-full px-5 py-2 active:scale-90 duration-200 ease-out" href="#">
+            <span class="material-symbols-outlined" data-icon="grocery" style="font-variation-settings: 'FILL' 1;">grocery</span>
+            <span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold">Stock</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-amber-900/70 dark:text-stone-400 px-5 py-2 hover:bg-orange-100/50 dark:hover:bg-stone-800/50 rounded-full transition-colors group" href="admin_dashboard/code.html">
+            <span class="material-symbols-outlined group-active:scale-90 duration-200" data-icon="admin_panel_settings">admin_panel_settings</span>
+            <span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold">Manage</span>
+        </a>
+    </nav>
+
+    <script>
+        // Set today's date on page load
+        function setTodayDate() {
+            const today = new Date();
+            const thai = today.toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('todayDate').textContent = thai;
+            
+            // Set default date input to tomorrow
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const isoDate = tomorrow.toISOString().split('T')[0];
+            document.getElementById('planDate').value = isoDate;
+        }
+
+        // Update summary when selections change
+        function updateSummary() {
+            const checkboxes = document.querySelectorAll('.menu-check');
+            const summary = document.getElementById('planSummary');
+            const items = [];
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const menuId = checkbox.dataset.menu;
+                    const input = document.querySelector(`input[type="number"][data-menu="${menuId}"]`);
+                    const quantity = parseInt(input.value) || 0;
+                    
+                    let menuName = '';
+                    let unit = '';
+                    
+                    switch(menuId) {
+                        case 'chicken': menuName = 'ไก่ย่างสูตรลับ'; unit = 'ชิ้น'; break;
+                        case 'noodles': menuName = 'ขนมจีนน้ำยา'; unit = 'ชาม'; break;
+                        case 'papaya': menuName = 'ส้มตำปรุงพิเศษ'; unit = 'ชาม'; break;
+                        case 'sausage': menuName = 'ไส้เหล้าสูตรแม่ค้า'; unit = 'ชิ้น'; break;
+                        case 'rice': menuName = 'ข้าวมันไก่จ้อย'; unit = 'กระบะ'; break;
+                        case 'meatball': menuName = 'ลูกชิ้นขา'; unit = 'ชิ้น'; break;
+                    }
+                    
+                    if (quantity > 0) {
+                        items.push(`<p class="text-on-surface"><span class="font-bold">${menuName}</span> - ${quantity} ${unit}</p>`);
+                    }
+                }
+            });
+
+            if (items.length === 0) {
+                summary.innerHTML = '<p class="text-on-surface-variant text-sm italic">เลือกเมนูและใส่จำนวนเพื่อดูสรุป</p>';
+            } else {
+                summary.innerHTML = items.join('');
+            }
+        }
+
+        // Save plan (integrate with backend)
+        function savePlan() {
+            const date = document.getElementById('planDate').value;
+            const plan = {};
+
+            document.querySelectorAll('.menu-check').forEach(checkbox => {
+                if (checkbox.checked) {
+                    const menuId = checkbox.dataset.menu;
+                    const input = document.querySelector(`input[type="number"][data-menu="${menuId}"]`);
+                    const quantity = parseInt(input.value) || 0;
+                    if (quantity > 0) {
+                        plan[menuId] = quantity;
+                    }
+                }
+            });
+
+            if (Object.keys(plan).length === 0) {
+                alert('กรุณาเลือกเมนูและใส่จำนวน');
+                return;
+            }
+
+            console.log('Saving plan for:', date, plan);
+            alert('บันทึกแผนการขายเรียบร้อยแล้ว!\n\nวันที่: ' + date + '\nจำนวนเมนู: ' + Object.keys(plan).length);
+        }
+
+        // Event listeners
+        document.querySelectorAll('.menu-check').forEach(checkbox => {
+            checkbox.addEventListener('change', updateSummary);
+        });
+
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('change', updateSummary);
+        });
+
+        // Initialize on page load
+        setTodayDate();
+    </script>
+</body>
+</html>
