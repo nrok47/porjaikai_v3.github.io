@@ -76,13 +76,27 @@
       }
     }
 
+    // Admin password authentication
+    const ADMIN_PASSWORD = '12399';
+
+    window.onload = function() {
+      const password = prompt("กรุณาป้อนรหัสผ่านแอดมิน:");
+      if (password !== ADMIN_PASSWORD) {
+        alert("รหัสผ่านไม่ถูกต้อง!");
+        window.location.href = "index.html"; // Redirect to main page
+        return;
+      }
+      // Proceed to load admin data
+      loadAdminData();
+    };
+
     async function loadAdminData() {
       const btn = document.getElementById("btnRefresh");
       btn.innerText = "⏳ กำลังโหลด...";
       document.getElementById('statusDot').className = "w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse mt-1"; // รีเซ็ตเป็นเหลือง
       
       try {
-        const response = await fetch(GAS_URL + "?action=getAdminData");
+        const response = await fetch(GAS_URL + "?action=getAdminData&password=" + ADMIN_PASSWORD);
         if(!response.ok) throw new Error("Network Error");
         const result = await response.json();
         
@@ -142,13 +156,13 @@
       const stock = document.getElementById("prodStock").value; const img = document.getElementById("prodImg").value;
       if(!name || !price || !stock) return alert("ใส่ข้อมูลให้ครบครับ");
       const btn = document.getElementById("btnSaveProd"); btn.innerText = "⏳..."; btn.disabled = true;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', data: { mode: id||oldName?'update':'create', id, oldName, name, price, stock, imageUrl: img }})});
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', password: ADMIN_PASSWORD, data: { mode: id||oldName?'update':'create', id, oldName, name, price, stock, imageUrl: img }})});
       clearProductForm(); loadAdminData(); btn.disabled = false;
     }
 
     async function deleteProduct(id, name) {
       if(!confirm(`⚠️ ลบเมนู "${name}"?`)) return;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', data: { mode: 'delete', id, oldName: name } }) });
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manageProduct', password: ADMIN_PASSWORD, data: { mode: 'delete', id, oldName: name } }) });
       loadAdminData();
     }
 
@@ -156,7 +170,7 @@
     function renderWalkInButtons(summary) { document.getElementById("walkInButtons").innerHTML = summary.map(item => `<button onclick="quickSale('${item.name}', ${item.price})" class="bg-orange-50 hover:bg-orange-100 text-orange-700 py-2 rounded-xl text-xs font-bold border border-orange-200 transition active:scale-95">${item.name}</button>`).join(''); }
     async function quickSale(name, price) {
       if(!confirm(`บันทึกขายหน้าร้าน: ${name}?`)) return;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'createOrder', data: { customerName: "ขายหน้างาน (Walk-in)", cart: [{name: name, qty: 1, price: price}], paymentMethod: "เงินสด", deliveryMethod: "รับเองหน้างาน" }})});
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'createOrder', password: ADMIN_PASSWORD, data: { customerName: "ขายหน้างาน (Walk-in)", cart: [{name: name, qty: 1, price: price}], paymentMethod: "เงินสด", deliveryMethod: "รับเองหน้างาน" }})});
       loadAdminData();
     }
 
@@ -168,7 +182,7 @@
     }
 
     async function updateStatus(orderId, type, value) {
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', data: { orderId, type, value }}) });
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', password: ADMIN_PASSWORD, data: { orderId, type, value }}) });
       loadAdminData(); 
     }
 
