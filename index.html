@@ -139,59 +139,11 @@
 
     <!-- ==================== TAB 3: ADMIN DASHBOARD ==================== -->
     <div id="tab-admin" class="tab-content hidden space-y-6">
-
-      <!-- Admin Auth Check -->
-      <div id="adminAuthSection" class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-        <p class="text-slate-600 font-bold mb-4">🔐 กรุณายืนยันตัวตนแอดมิน</p>
-        <input type="password" id="adminPassword" placeholder="รหัสผ่าน" class="w-full border border-slate-300 p-3 rounded-lg mb-3">
-        <button onclick="verifyAdmin()" class="w-full bg-primary text-white font-bold py-3 rounded-lg">เข้าระบบ</button>
+      <div class="card-surface p-8 rounded-2xl shadow-xl-soft text-center border-2 border-orange-200">
+        <h2 class="text-2xl font-black text-slate-800 mb-4">⚙️ จัดการระบบ (Admin)</h2>
+        <p class="text-slate-600 font-bold mb-6">หน้าต่างสำหรับจัดการร้านค้าได้ถูกย้ายและปรับปรุงใหม่<br>เพื่อใช้งานฟังก์ชัน "จัดสต๊อกรายวัน" กรุณากดปุ่มด้านล่างครับ</p>
+        <a href="admin.html" class="inline-block bg-orange-600 text-white font-black py-4 px-8 rounded-xl shadow-lg hover:bg-orange-700 hover:scale-105 transition transform text-lg">👉 ไปที่หน้าจัดการร้านค้า (Admin)</a>
       </div>
-
-      <div id="adminContent" class="hidden space-y-6">
-
-        <!-- Monthly Chart -->
-        <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
-          <h2 class="font-black text-lg text-slate-800 mb-4">📈 ยอดขายรายเดือน</h2>
-          <canvas id="monthlyChart" height="200"></canvas>
-        </div>
-
-        <!-- Financial Summary Grid -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-            <p class="text-2xl font-black text-orange-600" id="finTotal">0</p>
-            <p class="text-xs font-bold text-slate-500 uppercase mt-2">ยอดขายวันนี้</p>
-          </div>
-          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-            <p class="text-2xl font-black text-blue-600" id="finTransfer">0</p>
-            <p class="text-xs font-bold text-slate-500 uppercase mt-2">โอนเงิน</p>
-          </div>
-          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-            <p class="text-2xl font-black text-green-600" id="finCash">0</p>
-            <p class="text-xs font-bold text-slate-500 uppercase mt-2">เงินสด</p>
-          </div>
-          <div class="card-surface p-6 rounded-2xl shadow-xl-soft text-center">
-            <p class="text-2xl font-black text-red-600" id="finUnpaid">0</p>
-            <p class="text-xs font-bold text-slate-500 uppercase mt-2">ค้างจ่าย</p>
-          </div>
-        </div>
-
-        <!-- Delivery Checklist -->
-        <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="font-black text-lg text-slate-800">🚚 ส่งของวันนี้</h2>
-            <button onclick="loadAdminData()" class="text-xs bg-slate-100 px-3 py-1 rounded-lg font-bold">🔄 รีเฟรช</button>
-          </div>
-          <div id="deliveryList" class="space-y-3"></div>
-        </div>
-
-        <!-- Stock Management -->
-        <div class="card-surface p-6 rounded-2xl shadow-xl-soft">
-          <h2 class="font-black text-lg text-slate-800 mb-4">📊 จัดสต็อก</h2>
-          <div id="productCrudList" class="space-y-3"></div>
-        </div>
-
-      </div>
-
     </div>
 
   </div>
