@@ -87,6 +87,7 @@
 
   <script>
     const LIFF_ID = "2009833407-3mbGMf7p"; 
+    // 👇 แก้ไข URL เป็นของล่าสุดตรงนี้นะครับ
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxobiQN1X8Nrjj7_m_zLDKjCHil8RuQXHx6j9dDlNUH6iSQi2whD2GQmUda8UUX-iPQ-g/exec";
     
     let user = { id: "", name: "ลูกค้าทั่วไป" };
@@ -94,10 +95,12 @@
     let menuData = [];
     let cart = {};
 
-    // ฟังก์ชันจัดการไฟสถานะ
+    // 🟢 เขียนดักการพัง (Null check) สำหรับไฟสถานะ
     function setApiStatus(isOnline) {
       const dot = document.getElementById('statusDot');
       const text = document.getElementById('statusText');
+      if (!dot || !text) return; // ถ้าหาไม่เจอ ให้ข้ามไปเลย ระบบจะได้ไม่พัง
+
       if (isOnline) {
         dot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]";
         text.innerText = "เชื่อมต่อแล้ว";
@@ -117,7 +120,10 @@
           user.id = profile.userId;
           user.name = profile.displayName;
         }
-        document.getElementById("profileName").innerText = "👤 ผู้สั่ง: " + user.name;
+        
+        const nameLabel = document.getElementById("profileName");
+        if (nameLabel) nameLabel.innerText = "👤 ผู้สั่ง: " + user.name;
+
       } catch (err) { console.log("Run on Web Browser"); }
       loadMenu();
     }
@@ -131,19 +137,23 @@
         
         menuData = result.data;
         renderMenu();
-        setApiStatus(true); // 🟢 สำเร็จ เปลี่ยนเป็นสีเขียว
+        setApiStatus(true); 
       } catch (error) {
-        document.getElementById("loadingText").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล ❌";
-        document.getElementById("loadingText").className = "text-center text-red-500 text-sm font-bold mt-10";
-        setApiStatus(false); // 🔴 พัง เปลี่ยนเป็นสีแดง
+        // เขียนดัก Null เผื่อใน HTML ไม่มี LoadingText
+        const loading = document.getElementById("loadingText");
+        if (loading) {
+          loading.innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล ❌";
+          loading.className = "text-center text-red-500 text-sm font-bold mt-10";
+        }
+        setApiStatus(false);
       }
     }
 
     function renderMenu() {
       const container = document.getElementById("productList");
+      if (!container) return;
+
       container.innerHTML = "";
-      
-      // ใช้ placehold.co ที่ปลอดภัยกว่า หรือถ้าไม่มีรูประบบก็จะแสดงกล่องสีเทาแทน
       const fallbackImg = "https://placehold.co/150x150/ffedd5/f97316?text=Menu";
 
       menuData.forEach((item, index) => {
@@ -177,21 +187,29 @@
       if (newQty > max) { alert("เกินโควต้าที่เหลือจ้า"); newQty = max; }
       cart[name].qty = newQty;
       const idx = menuData.findIndex(p => p.name === name);
-      document.getElementById(`qty-${idx}`).innerText = newQty;
+      const qtyLabel = document.getElementById(`qty-${idx}`);
+      if (qtyLabel) qtyLabel.innerText = newQty;
       updateTotal();
     }
 
     function updateTotal() {
       let price = 0, items = 0;
       for (const k in cart) { price += (cart[k].qty * cart[k].price); items += cart[k].qty; }
-      document.getElementById("totalPrice").innerText = price;
-      document.getElementById("totalItems").innerText = items;
-      document.getElementById("btnSubmit").disabled = items === 0;
+      
+      const pLabel = document.getElementById("totalPrice");
+      const iLabel = document.getElementById("totalItems");
+      const btn = document.getElementById("btnSubmit");
+
+      if (pLabel) pLabel.innerText = price;
+      if (iLabel) iLabel.innerText = items;
+      if (btn) btn.disabled = items === 0;
     }
 
     function processImage(input) {
       if (!input.files || !input.files[0]) return;
-      document.getElementById('uploadLabel').innerText = "⏳ กำลังย่อขนาดรูป...";
+      const uploadLabel = document.getElementById('uploadLabel');
+      if (uploadLabel) uploadLabel.innerText = "⏳ กำลังย่อขนาดรูป...";
+      
       const reader = new FileReader();
       reader.readAsDataURL(input.files[0]);
       reader.onload = e => {
@@ -204,9 +222,13 @@
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           base64Image = canvas.toDataURL('image/jpeg', 0.7);
-          document.getElementById('preview').src = base64Image;
-          document.getElementById('preview').classList.remove('hidden');
-          document.getElementById('uploadLabel').innerText = "✅ แนบรูปเรียบร้อย";
+          
+          const preview = document.getElementById('preview');
+          if (preview) {
+            preview.src = base64Image;
+            preview.classList.remove('hidden');
+          }
+          if (uploadLabel) uploadLabel.innerText = "✅ แนบรูปเรียบร้อย";
         }
       }
     }
@@ -216,8 +238,10 @@
       let items = [];
       for (const k in cart) if (cart[k].qty > 0) items.push({ name: k, qty: cart[k].qty, price: cart[k].price });
       
-      btn.disabled = true;
-      btn.innerText = "กำลังบันทึกออเดอร์... ⏳";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "กำลังบันทึกออเดอร์... ⏳";
+      }
 
       const payload = {
         action: "createOrder",
@@ -242,8 +266,10 @@
         }
       } catch (err) { 
         alert("เกิดข้อผิดพลาดในการส่งข้อมูล 🔴"); 
-        btn.disabled = false; 
-        btn.innerText = "ยืนยันการสั่งซื้อ 🚀"; 
+        if (btn) {
+          btn.disabled = false; 
+          btn.innerText = "ยืนยันการสั่งซื้อ 🚀"; 
+        }
       }
     }
   </script>
