@@ -3,275 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ร้านพอใจขาย - สั่งอาหาร</title>
+  <title>ร้านพอใจขาย v7</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-slate-50 min-h-screen pb-40 font-sans">
-  
-  <div class="bg-white p-6 rounded-b-3xl shadow-sm text-center border-b-4 border-orange-400 relative">
+<body class="bg-slate-50 min-h-screen pb-20 font-sans">
+
+  <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-orange-100">
+    <div class="flex justify-around p-3 max-w-md mx-auto">
+      <button onclick="showTab('today')" class="tab-btn font-bold text-slate-400 border-b-2 border-transparent px-2 pb-1 active-tab">ออเดอร์วันนี้</button>
+      <button onclick="showTab('order')" class="tab-btn font-bold text-slate-400 border-b-2 border-transparent px-2 pb-1">สั่งของ</button>
+      <button onclick="showTab('admin')" class="tab-btn font-bold text-slate-400 border-b-2 border-transparent px-2 pb-1">Admin</button>
+    </div>
+  </nav>
+
+  <div class="max-w-md mx-auto p-4">
     
-    <div class="absolute top-4 right-4 flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full shadow-sm">
-      <div id="statusDot" class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-      <span id="statusText" class="text-[10px] font-bold text-slate-500">กำลังเชื่อมต่อ...</span>
-    </div>
-
-    <h1 class="text-2xl font-black text-slate-800 tracking-tight">🌽 ร้านพอใจขาย</h1>
-    <p class="text-orange-600 font-bold text-sm mt-1">รับออเดอร์ล่วงหน้า ของอร่อยพร้อมเสิร์ฟจ้า</p>
-    <p id="profileName" class="text-xs text-slate-400 mt-3 bg-slate-100 inline-block px-3 py-1 rounded-full">👤 กำลังโหลดข้อมูลผู้สั่ง...</p>
-  </div>
-
-  <div id="productList" class="p-4 space-y-4 max-w-md mx-auto">
-    <p id="loadingText" class="text-center text-slate-400 text-sm animate-pulse mt-10">กำลังจัดเตรียมเมนูวันนี้...</p>
-  </div>
-
-  <div class="max-w-md mx-auto px-4 space-y-4 mb-10">
-    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-      <h3 class="font-bold text-slate-700 mb-3 text-sm">🚚 วิธีรับของ</h3>
-      <div class="grid grid-cols-2 gap-3">
-        <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition has-[:checked]:border-orange-400 has-[:checked]:bg-orange-50">
-          <input type="radio" name="deliveryMethod" value="ส่งที่โต๊ะ" checked class="hidden">
-          <span class="text-sm font-bold text-slate-600">ส่งที่โต๊ะ</span>
-        </label>
-        <label class="flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition has-[:checked]:border-orange-400 has-[:checked]:bg-orange-50">
-          <input type="radio" name="deliveryMethod" value="มารับเอง" class="hidden">
-          <span class="text-sm font-bold text-slate-600">มารับเอง</span>
-        </label>
+    <div id="tab-today" class="tab-content space-y-4">
+      <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+        <h2 class="text-orange-600 font-black text-lg mb-4 text-center">📋 สรุปรายการจองวันนี้</h2>
+        <div id="todayLineSummary" class="space-y-6 text-sm leading-relaxed">
+          </div>
       </div>
     </div>
 
-    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-      <h3 class="font-bold text-slate-700 mb-3 text-sm">💰 วิธีชำระเงิน</h3>
-      <div class="grid grid-cols-3 gap-2">
-        <label class="flex flex-col items-center p-2 border-2 rounded-xl cursor-pointer has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50">
-          <input type="radio" name="paymentMethod" value="โอนเงิน" checked class="hidden">
-          <span class="text-xs font-bold">โอนเงิน</span>
-        </label>
-        <label class="flex flex-col items-center p-2 border-2 rounded-xl cursor-pointer has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50">
-          <input type="radio" name="paymentMethod" value="เงินสด" class="hidden">
-          <span class="text-xs font-bold">เงินสด</span>
-        </label>
-        <label class="flex flex-col items-center p-2 border-2 rounded-xl cursor-pointer has-[:checked]:border-red-400 has-[:checked]:bg-red-50">
-          <input type="radio" name="paymentMethod" value="ค้างจ่าย" class="hidden">
-          <span class="text-xs font-bold">ค้างจ่าย</span>
-        </label>
+    <div id="tab-order" class="tab-content hidden space-y-6">
+      <div id="myStatusSection" class="hidden bg-blue-50 p-4 rounded-2xl border border-blue-100">
+        <h3 class="font-bold text-blue-700 text-xs uppercase mb-2">ออเดอร์ของคุณวันนี้:</h3>
+        <div id="myOrdersList" class="space-y-1"></div>
       </div>
 
-      <div id="slipArea" class="mt-4 pt-4 border-t border-slate-50">
-        <label class="cursor-pointer block border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition">
-          <span id="uploadLabel" class="text-xs font-bold text-slate-500">📸 แนบสลิป (เฉพาะโอนเงิน)</span>
-          <input type="file" id="slipInput" accept="image/*" class="hidden" onchange="processImage(this)">
-        </label>
-        <img id="preview" class="hidden mt-3 rounded-xl max-h-40 mx-auto shadow-md border-2 border-white">
-      </div>
-    </div>
-  </div>
+      <div id="productList" class="space-y-3"></div>
 
-  <div class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] z-50">
-    <div class="max-w-md mx-auto">
-      <div class="flex justify-between items-center mb-4 px-2">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
         <div>
-          <p class="text-slate-400 text-xs font-bold uppercase">รวมทั้งสิ้น</p>
-          <p class="text-3xl font-black text-slate-800"><span id="totalPrice">0</span> <small class="text-lg">฿</small></p>
+          <label class="text-xs font-bold text-slate-400 uppercase">วิธีรับของ:</label>
+          <div class="grid grid-cols-2 gap-2 mt-1">
+             <button onclick="setDel('ส่งที่โต๊ะ')" class="del-btn bg-slate-100 p-2 rounded-xl text-sm font-bold border-2 border-transparent">ส่งที่โต๊ะ</button>
+             <button onclick="setDel('มารับเอง')" class="del-btn bg-slate-100 p-2 rounded-xl text-sm font-bold border-2 border-transparent">มารับเอง</button>
+          </div>
         </div>
-        <div class="text-right">
-          <p class="text-slate-400 text-xs font-bold uppercase">รายการ</p>
-          <p class="text-xl font-bold text-orange-500"><span id="totalItems">0</span></p>
+        <div>
+          <label class="text-xs font-bold text-slate-400 uppercase">วิธีจ่ายเงิน:</label>
+          <div class="grid grid-cols-2 gap-2 mt-1">
+             <button onclick="setPay('โอนเงิน')" class="pay-btn bg-slate-100 p-2 rounded-xl text-sm font-bold border-2 border-transparent">โอนเงิน</button>
+             <button onclick="setPay('เงินสด')" class="pay-btn bg-slate-100 p-2 rounded-xl text-sm font-bold border-2 border-transparent">เงินสด</button>
+          </div>
         </div>
       </div>
-      <button onclick="submitOrder()" id="btnSubmit" class="w-full bg-orange-500 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-50 text-lg">
-        ยืนยันการสั่งซื้อ 🚀
-      </button>
+      <button onclick="submitOrder()" class="w-full bg-orange-500 text-white font-black py-4 rounded-2xl shadow-lg">ยืนยันการสั่ง 🚀</button>
     </div>
+
+    <div id="tab-admin" class="tab-content hidden space-y-4">
+      <div class="bg-white p-5 rounded-3xl shadow-sm border-t-4 border-green-500">
+        <h3 class="font-bold text-slate-400 text-xs mb-3">ภาพรวมยอดขายรายเดือน</h3>
+        <canvas id="monthlyChart" height="200"></canvas>
+      </div>
+      </div>
+
   </div>
 
   <script>
-    const LIFF_ID = "2009833407-3mbGMf7p"; 
-    // 👇 แก้ไข URL เป็นของล่าสุดตรงนี้นะครับ
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxobiQN1X8Nrjj7_m_zLDKjCHil8RuQXHx6j9dDlNUH6iSQi2whD2GQmUda8UUX-iPQ-g/exec";
-    
-    let user = { id: "", name: "ลูกค้าทั่วไป" };
-    let base64Image = "";
-    let menuData = [];
-    let cart = {};
-
-    // 🟢 เขียนดักการพัง (Null check) สำหรับไฟสถานะ
-    function setApiStatus(isOnline) {
-      const dot = document.getElementById('statusDot');
-      const text = document.getElementById('statusText');
-      if (!dot || !text) return; // ถ้าหาไม่เจอ ให้ข้ามไปเลย ระบบจะได้ไม่พัง
-
-      if (isOnline) {
-        dot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]";
-        text.innerText = "เชื่อมต่อแล้ว";
-        text.className = "text-[10px] font-bold text-green-600";
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]";
-        text.innerText = "ระบบขัดข้อง";
-        text.className = "text-[10px] font-bold text-red-600";
-      }
+    // การเปลี่ยนแท็บ
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab', 'text-orange-500', 'border-orange-500'));
+      event.target.classList.add('active-tab', 'text-orange-500', 'border-orange-500');
+      if(tabId === 'admin') loadAdminData();
     }
 
-    async function init() {
-      try {
-        await liff.init({ liffId: LIFF_ID });
-        if (liff.isLoggedIn()) {
-          const profile = await liff.getProfile();
-          user.id = profile.userId;
-          user.name = profile.displayName;
-        }
-        
-        const nameLabel = document.getElementById("profileName");
-        if (nameLabel) nameLabel.innerText = "👤 ผู้สั่ง: " + user.name;
-
-      } catch (err) { console.log("Run on Web Browser"); }
-      loadMenu();
-    }
-    init();
-
-    async function loadMenu() {
-      try {
-        const response = await fetch(GAS_URL + "?action=getDashboard");
-        if (!response.ok) throw new Error("Network Error");
-        const result = await response.json();
-        
-        menuData = result.data;
-        renderMenu();
-        setApiStatus(true); 
-      } catch (error) {
-        // เขียนดัก Null เผื่อใน HTML ไม่มี LoadingText
-        const loading = document.getElementById("loadingText");
-        if (loading) {
-          loading.innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล ❌";
-          loading.className = "text-center text-red-500 text-sm font-bold mt-10";
-        }
-        setApiStatus(false);
-      }
-    }
-
-    function renderMenu() {
-      const container = document.getElementById("productList");
-      if (!container) return;
-
-      container.innerHTML = "";
-      const fallbackImg = "https://placehold.co/150x150/ffedd5/f97316?text=Menu";
-
-      menuData.forEach((item, index) => {
-        cart[item.name] = { qty: 0, price: item.price };
-        const isSoldOut = item.remaining <= 0;
-        const imgUrl = item.imageUrl || fallbackImg;
-        
-        container.innerHTML += `
-          <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4 ${isSoldOut ? 'opacity-60' : ''}">
-            <div class="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
-              <img src="${imgUrl}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover">
-            </div>
-            <div class="flex-grow">
-              <h3 class="font-black text-slate-800">${item.name}</h3>
-              <p class="text-orange-500 font-bold text-sm">${item.price} ฿</p>
-              <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase">คงเหลือ: ${item.remaining}</p>
-            </div>
-            <div class="flex items-center space-x-2 bg-slate-50 p-1 rounded-lg">
-              <button onclick="updateQty('${item.name}', -1, ${item.remaining})" class="w-8 h-8 bg-white rounded-md shadow-sm font-bold text-slate-600">-</button>
-              <span id="qty-${index}" class="w-4 text-center font-black text-slate-800">0</span>
-              <button onclick="updateQty('${item.name}', 1, ${item.remaining})" class="w-8 h-8 bg-orange-400 rounded-md shadow-sm font-bold text-white ${isSoldOut ? 'hidden' : ''}">+</button>
-            </div>
-          </div>
-        `;
+    // ฟังก์ชันดึงข้อมูลมาแสดงแบบโพสต์ไลน์
+    async function loadDashboard() {
+      const res = await fetch(GAS_URL + "?action=getDashboard&lineId=" + user.id);
+      const result = await res.json();
+      
+      // Render Line Style Summary
+      const summaryDiv = document.getElementById('todayLineSummary');
+      let lineText = "";
+      result.data.products.forEach(p => {
+        lineText += `<div class="border-b pb-3"><p class="font-black text-slate-800">${p.name} ${p.price}.-</p>`;
+        p.buyers.forEach((b, i) => {
+          lineText += `<p class="text-slate-600">${i+1}. ${b}</p>`;
+        });
+        lineText += `</div>`;
       });
-    }
+      summaryDiv.innerHTML = lineText;
 
-    function updateQty(name, change, max) {
-      let newQty = cart[name].qty + change;
-      if (newQty < 0) newQty = 0;
-      if (newQty > max) { alert("เกินโควต้าที่เหลือจ้า"); newQty = max; }
-      cart[name].qty = newQty;
-      const idx = menuData.findIndex(p => p.name === name);
-      const qtyLabel = document.getElementById(`qty-${idx}`);
-      if (qtyLabel) qtyLabel.innerText = newQty;
-      updateTotal();
-    }
-
-    function updateTotal() {
-      let price = 0, items = 0;
-      for (const k in cart) { price += (cart[k].qty * cart[k].price); items += cart[k].qty; }
-      
-      const pLabel = document.getElementById("totalPrice");
-      const iLabel = document.getElementById("totalItems");
-      const btn = document.getElementById("btnSubmit");
-
-      if (pLabel) pLabel.innerText = price;
-      if (iLabel) iLabel.innerText = items;
-      if (btn) btn.disabled = items === 0;
-    }
-
-    function processImage(input) {
-      if (!input.files || !input.files[0]) return;
-      const uploadLabel = document.getElementById('uploadLabel');
-      if (uploadLabel) uploadLabel.innerText = "⏳ กำลังย่อขนาดรูป...";
-      
-      const reader = new FileReader();
-      reader.readAsDataURL(input.files[0]);
-      reader.onload = e => {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let w = img.width, h = img.height;
-          if (w > h && w > 800) { h *= 800/w; w = 800; } else if (h > 800) { w *= 800/h; h = 800; }
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          base64Image = canvas.toDataURL('image/jpeg', 0.7);
-          
-          const preview = document.getElementById('preview');
-          if (preview) {
-            preview.src = base64Image;
-            preview.classList.remove('hidden');
-          }
-          if (uploadLabel) uploadLabel.innerText = "✅ แนบรูปเรียบร้อย";
-        }
-      }
-    }
-
-    async function submitOrder() {
-      const btn = document.getElementById("btnSubmit");
-      let items = [];
-      for (const k in cart) if (cart[k].qty > 0) items.push({ name: k, qty: cart[k].qty, price: cart[k].price });
-      
-      if (btn) {
-        btn.disabled = true;
-        btn.innerText = "กำลังบันทึกออเดอร์... ⏳";
-      }
-
-      const payload = {
-        action: "createOrder",
-        data: {
-          customerName: user.name,
-          lineId: user.id,
-          cart: items,
-          deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
-          paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-          slipBase64: base64Image
-        }
-      };
-
-      try {
-        const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
-        const result = await res.json();
-        if (result.status === "success") { 
-          alert("จองสำเร็จ! ขอบคุณมากค่ะ 🎉"); 
-          liff.closeWindow(); 
-        } else {
-          throw new Error(result.message);
-        }
-      } catch (err) { 
-        alert("เกิดข้อผิดพลาดในการส่งข้อมูล 🔴"); 
-        if (btn) {
-          btn.disabled = false; 
-          btn.innerText = "ยืนยันการสั่งซื้อ 🚀"; 
-        }
+      // Render My Orders Status
+      if(result.data.myOrders.length > 0) {
+        document.getElementById('myStatusSection').classList.remove('hidden');
+        document.getElementById('myOrdersList').innerHTML = result.data.myOrders.map(o => 
+          `<div class="flex justify-between text-xs"><span>${o.name} x${o.qty}</span><span class="font-bold">${o.payStatus} | ${o.delStatus}</span></div>`
+        ).join('');
       }
     }
   </script>
+
+  <style>
+    .active-tab { color: #f97316; border-color: #f97316; }
+  </style>
 </body>
 </html>
