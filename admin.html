@@ -438,7 +438,7 @@
               <div class="${delivered ? 'opacity-50' : ''} flex items-start space-x-3 flex-grow">
                 <div class="table-badge">T${(i+1).toString().padStart(2,'0')}</div>
                 <div>
-                  <p class="font-black text-slate-800">${o.customer}</p>
+                  <p class="font-black text-slate-800">${o.customer} <span class="text-orange-600 font-bold ml-2">฿${o.totalPrice}</span></p>
                   <p class="text-sm text-slate-600 mt-1">${aggregateItems(o.items)}</p>
                   <div class="flex gap-2 mt-2">
                     <span class="badge ${delivered ? 'badge-success' : 'badge-pending'}">${delivered ? '✅ ส่งแล้ว' : '⏳ รอส่ง'}</span>
@@ -449,10 +449,10 @@
               </div>
             </div>
             <div class="flex gap-2">
-              <button onclick="updateStatus('${o.orderId}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="flex-1 py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}">
+              <button onclick="updateStatus('${o.orderId}', '${o.customer}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="flex-1 py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}">
                 ${delivered ? '↩️ ยกเลิก' : '📦 เช็กส่งของ'}
               </button>
-              <button onclick="updateStatus('${o.orderId}', 'payment', '${paid ? 'รอชำระเงิน' : 'ชำระเงินแล้ว'}')" class="flex-1 py-2 rounded-lg font-bold text-xs transition ${paid ? 'bg-green-500 text-white' : 'bg-orange-500 text-white hover:bg-orange-600'}">
+              <button onclick="updateStatus('${o.orderId}', '${o.customer}', 'payment', '${paid ? 'รอชำระเงิน' : 'ชำระเงินแล้ว'}')" class="flex-1 py-2 rounded-lg font-bold text-xs transition ${paid ? 'bg-green-500 text-white' : 'bg-orange-500 text-white hover:bg-orange-600'}">
                 ${paid ? '↩️ ยกเลิก' : '💰 จ่ายแล้ว'}
               </button>
             </div>
@@ -463,14 +463,14 @@
 
 
 
-    async function updateStatus(orderId, type, value) {
+    async function updateStatus(orderId, customerName, type, value) {
       try {
         await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({
             action: 'updateStatus',
             password: '12399',
-            data: { orderId, type, value }
+            data: { orderId, customerName, type, value }
           })
         });
         loadAdminData();

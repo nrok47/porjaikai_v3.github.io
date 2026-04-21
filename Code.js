@@ -193,18 +193,18 @@ function getAdminData() {
         finance.unpaid += rowPrice;
       }
 
-      if (!ordersMap[orderId]) {
-        ordersMap[orderId] = {
-          orderId: orderId, customerNames: [orderData[i][2]], customer: orderData[i][2], items: [],
-          deliveryMethod: deliveryMethod, deliveryStatus: deliveryStatus, payMethod: payMethod
+      const customerName = orderData[i][2];
+      const uniqueKey = orderId + "_" + customerName;
+
+      if (!ordersMap[uniqueKey]) {
+        ordersMap[uniqueKey] = {
+          orderId: orderId, customer: customerName, items: [],
+          deliveryMethod: deliveryMethod, deliveryStatus: deliveryStatus, payMethod: payMethod,
+          totalPrice: 0
         };
-      } else {
-        if (ordersMap[orderId].customerNames.indexOf(orderData[i][2]) === -1) {
-          ordersMap[orderId].customerNames.push(orderData[i][2]);
-          ordersMap[orderId].customer = ordersMap[orderId].customerNames.join(', ');
-        }
       }
-      ordersMap[orderId].items.push(`${product} x${qty}`);
+      ordersMap[uniqueKey].items.push(`${product} x${qty}`);
+      ordersMap[uniqueKey].totalPrice += rowPrice;
     }
   }
 
@@ -273,10 +273,12 @@ function updateStatus(data) {
   
   for (let i = 1; i < values.length; i++) {
     if (values[i][0] === data.orderId) {
-      if (data.type === 'delivery') {
-        sheet.getRange(i + 1, 11).setValue(data.value); // Column K
-      } else if (data.type === 'payment') {
-        sheet.getRange(i + 1, 12).setValue(data.value); // Column L
+      if (!data.customerName || values[i][2] === data.customerName) {
+        if (data.type === 'delivery') {
+          sheet.getRange(i + 1, 11).setValue(data.value); // Column K
+        } else if (data.type === 'payment') {
+          sheet.getRange(i + 1, 12).setValue(data.value); // Column L
+        }
       }
     }
   }

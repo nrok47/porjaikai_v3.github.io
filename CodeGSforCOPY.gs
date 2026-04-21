@@ -193,13 +193,15 @@ function getAdminData() {
         finance.unpaid += rowPrice;
       }
 
-      if (!ordersMap[orderId]) {
-        ordersMap[orderId] = {
-          orderId: orderId, customer: orderData[i][2], items: [],
-          deliveryMethod: deliveryMethod, deliveryStatus: deliveryStatus, payMethod: payMethod
+      if (!ordersMap[uniqueKey]) {
+        ordersMap[uniqueKey] = {
+          orderId: orderId, customer: customerName, items: [],
+          deliveryMethod: deliveryMethod, deliveryStatus: deliveryStatus, payMethod: payMethod,
+          totalPrice: 0
         };
       }
-      ordersMap[orderId].items.push(`${product} x${qty}`);
+      ordersMap[uniqueKey].items.push(`${product} x${qty}`);
+      ordersMap[uniqueKey].totalPrice += rowPrice;
     }
   }
 
@@ -268,10 +270,12 @@ function updateStatus(data) {
   
   for (let i = 1; i < values.length; i++) {
     if (values[i][0] === data.orderId) {
-      if (data.type === 'delivery') {
-        sheet.getRange(i + 1, 11).setValue(data.value); // Column K
-      } else if (data.type === 'payment') {
-        sheet.getRange(i + 1, 12).setValue(data.value); // Column L
+      if (!data.customerName || values[i][2] === data.customerName) {
+        if (data.type === 'delivery') {
+          sheet.getRange(i + 1, 11).setValue(data.value); // Column K
+        } else if (data.type === 'payment') {
+          sheet.getRange(i + 1, 12).setValue(data.value); // Column L
+        }
       }
     }
   }
