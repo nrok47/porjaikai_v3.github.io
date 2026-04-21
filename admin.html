@@ -413,6 +413,21 @@
       }
     }
 
+    function aggregateItems(items) {
+      const map = {};
+      items.forEach(item => {
+        let name = item.trim();
+        let qty = 1;
+        const match = name.match(/^(.*?)(?:\s*x(\d+))?$/i);
+        if(match) {
+          name = match[1].trim();
+          qty = match[2] ? parseInt(match[2]) : 1;
+        }
+        map[name] = (map[name] || 0) + qty;
+      });
+      return Object.keys(map).map(k => `${k} x${map[k]}`).join(', ');
+    }
+
     function renderDelivery(orders) {
       const list = document.getElementById('deliveryList');
       if(orders.length === 0) {
@@ -429,7 +444,7 @@
                 <div class="table-badge">T${(i+1).toString().padStart(2,'0')}</div>
                 <div>
                   <p class="font-black text-slate-800">${o.customer}</p>
-                  <p class="text-sm text-slate-600 mt-1">${o.items.join(', ')}</p>
+                  <p class="text-sm text-slate-600 mt-1">${aggregateItems(o.items)}</p>
                   <div class="flex gap-2 mt-2">
                     <span class="badge ${delivered ? 'badge-success' : 'badge-pending'}">${delivered ? '✅ ส่งแล้ว' : '⏳ รอส่ง'}</span>
                     <span class="badge ${paid ? 'badge-success' : 'badge-warning'}">${paid ? '💳 ชำระแล้ว' : '⏳ ค้างจ่าย'}</span>

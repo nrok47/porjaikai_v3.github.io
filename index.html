@@ -399,7 +399,15 @@
                 <p class="font-black text-slate-800">${order.customer}</p>
                 <span class="badge badge-info">${order.deliveryMethod}</span>
               </div>
-              <p class="text-xs text-slate-500 mb-3">${order.items.join(', ')}</p>
+              <p class="text-xs text-slate-500 mb-3">${(function(arr) {
+                const map={}; 
+                arr.forEach(i => {
+                  let n=i.trim(), q=1, m=n.match(/^(.*?)(?:\s*x(\d+))?$/i);
+                  if(m){ n=m[1].trim(); q=m[2]?parseInt(m[2]):1; }
+                  map[n]=(map[n]||0)+q;
+                });
+                return Object.keys(map).map(k=>k+' x'+map[k]).join(', ');
+              })(order.items)}</p>
               <button onclick="updateStatus('${order.orderId}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="w-full py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-700'}">
                 ${delivered ? '✅ ส่งแล้ว' : '📦 เช็กส่งของ'}
               </button>
