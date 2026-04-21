@@ -195,9 +195,14 @@ function getAdminData() {
 
       if (!ordersMap[orderId]) {
         ordersMap[orderId] = {
-          orderId: orderId, customer: orderData[i][2], items: [],
+          orderId: orderId, customerNames: [orderData[i][2]], customer: orderData[i][2], items: [],
           deliveryMethod: deliveryMethod, deliveryStatus: deliveryStatus, payMethod: payMethod
         };
+      } else {
+        if (ordersMap[orderId].customerNames.indexOf(orderData[i][2]) === -1) {
+          ordersMap[orderId].customerNames.push(orderData[i][2]);
+          ordersMap[orderId].customer = ordersMap[orderId].customerNames.join(', ');
+        }
       }
       ordersMap[orderId].items.push(`${product} x${qty}`);
     }
