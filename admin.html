@@ -378,7 +378,14 @@
 
     function renderWalkIn() {
       const buttons = document.getElementById('walkInButtons');
-      buttons.innerHTML = allProducts.slice(0, 8).map(p => `
+      const activeProducts = allProducts.filter(p => p.isActive);
+      
+      if(activeProducts.length === 0) {
+        buttons.innerHTML = '<p class="text-xs text-slate-400 col-span-full text-center">ไม่มีเมนูที่เปิดขายตอนนี้</p>';
+        return;
+      }
+      
+      buttons.innerHTML = activeProducts.map(p => `
         <button onclick="quickSale('${p.name}', ${p.price})" class="p-4 rounded-lg font-bold text-sm bg-gradient-to-br from-orange-100 to-orange-200 text-orange-700 hover:shadow-lg transition active:scale-95">
           <div>${p.name}</div>
           <div class="text-xs mt-1">${p.price}฿</div>
