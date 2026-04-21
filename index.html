@@ -393,16 +393,20 @@
         // Delivery List
         document.getElementById('deliveryList').innerHTML = data.orders.map(order => {
           const delivered = order.deliveryStatus === 'ส่งแล้ว';
+          const paid = order.payStatus === 'ชำระเงินแล้ว';
           return `
-            <div class="bg-slate-50 p-4 rounded-lg">
-              <div class="flex justify-between items-center mb-2">
-                <p class="font-bold text-slate-800">${order.customer}</p>
-                <div class="flex items-center space-x-2">
-                   <span class="text-orange-600 font-bold">฿${order.totalPrice}</span>
-                   <span class="badge badge-info">${order.deliveryMethod}</span>
+            <div class="bg-slate-50 p-4 rounded-lg border-l-4 ${delivered ? 'border-green-400' : 'border-blue-400'} mb-4">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <p class="font-bold text-slate-800 text-lg">${order.customer} <span class="text-orange-600 font-bold ml-1">฿${order.totalPrice}</span></p>
+                  <p class="text-xs text-slate-500">${order.deliveryMethod} | ${order.payMethod}</p>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                  <span class="badge ${delivered ? 'badge-success' : 'badge-pending'} text-[10px]">${delivered ? '✅ ส่งแล้ว' : '⏳ รอส่ง'}</span>
+                  <span class="badge ${paid ? 'badge-success' : 'badge-warning'} text-[10px]">${paid ? '💳 จ่ายแล้ว' : '⏳ ค้างจ่าย'}</span>
                 </div>
               </div>
-              <p class="text-xs text-slate-500 mb-3">${(function(arr) {
+              <p class="text-sm text-slate-600 mb-3">${(function(arr) {
                 const map={}; 
                 arr.forEach(i => {
                   let n=i.trim(), q=1, m=n.match(/^(.*?)(?:\s*x(\d+))?$/i);
@@ -411,9 +415,14 @@
                 });
                 return Object.keys(map).map(k=>k+' x'+map[k]).join(', ');
               })(order.items)}</p>
-              <button onclick="updateStatus('${order.orderId}', '${order.customer}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="w-full py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-slate-200 text-slate-700'}">
-                ${delivered ? '✅ ส่งแล้ว' : '📦 เช็กส่งของ'}
-              </button>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="updateStatus('${order.orderId}', '${order.customer}', 'delivery', '${delivered ? 'ยังไม่ได้ส่ง' : 'ส่งแล้ว'}')" class="py-2 rounded-lg font-bold text-xs transition ${delivered ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}">
+                  ${delivered ? '↩️ ยกเลิกส่ง' : '📦 ส่งของ'}
+                </button>
+                <button onclick="updateStatus('${order.orderId}', '${order.customer}', 'payment', '${paid ? 'รอชำระเงิน' : 'ชำระเงินแล้ว'}')" class="py-2 rounded-lg font-bold text-xs transition ${paid ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}">
+                  ${paid ? '↩️ ยกเลิกจ่าย' : '💰 จ่ายแล้ว'}
+                </button>
+              </div>
             </div>
           `;
         }).join('');
